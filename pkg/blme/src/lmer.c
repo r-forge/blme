@@ -41,6 +41,7 @@
 #include "blmer.h"
 #include "util.h"
 #include "lmm.h"
+#include "glmm.h"
 #include "lmer_common.h"
 
 #include "common_inlines.h"
@@ -583,14 +584,11 @@ static double update_mu(SEXP x)
   /* store u'u */
   d[usqr_POS] = getSumOfSquares((double*)(cu->x), dims[q_POS]);
   d[pwrss_POS] = d[usqr_POS] + d[wrss_POS];
-  // blme edit
-  if (canProfileCommonScale(x)) {
-    d[sigmaML_POS] = sqrt(d[pwrss_POS]/
+  d[sigmaML_POS] = sqrt(d[pwrss_POS]/
                         (srwt ? getSumOfSquares(srwt, n) : (double) n));
-    d[sigmaREML_POS] = (gradient || muEta) ? NA_REAL :
-      d[sigmaML_POS] * sqrt((((double) n)/((double)(n - p))));
-  }
-  // blme end
+  d[sigmaREML_POS] = (gradient || muEta) ? NA_REAL :
+  d[sigmaML_POS] * sqrt((((double) n)/((double)(n - p))));
+  
   return d[pwrss_POS];
 }
 
@@ -929,13 +927,13 @@ static double update_dev(SEXP x)
 	    double *ans = Calloc(nl, double);    /* current penalized residuals in different levels */
       
       /* update abscissas and weights */
+      /* fixes from Wayne Zhang */
 	    for(int i = 0; i < nre; ++i){
         for(int j = 0; j < nl; ++j){
           z[i + j * nre] = ghx[pointer[i]];
         }
         w_pro *= ghw[pointer[i]];
-        if(!MUETA_SLOT(x))
-          z_sum += z[pointer[i]] * z[pointer[i]];
+        z_sum += ghx[pointer[i]] * ghx[pointer[i]];
 	    }
       
 	    CHM_DN cz = N_AS_CHM_DN(z, q, 1), sol;
@@ -944,7 +942,9 @@ static double update_dev(SEXP x)
 	    Memcpy(z, (double *)sol->x, q);
 	    M_cholmod_free_dense(&sol, &cholmodCommon);
       
-	    for(int i = 0; i < q; ++i) u[i] = uold[i] + sigma * z[i];
+	    /* fix from Wayne Zhang */
+	    for(int i = 0; i < q; ++i) 
+        u[i] = uold[i] + M_SQRT2 * sigma * z[i];
 	    update_mu(x);
 	    
 	    AZERO(ans, nl);
@@ -1239,6 +1239,8 @@ static void initializeOptimizerSettings(SEXP regression,
   AZERO(stateV, stateVLength);
   
   S_Rf_divset(OPT, stateIV, stateIVLength, stateVLength, stateV);
+  
+  // stateV[41] = 1.0e-9;
 
   stateIV[OUTLEV] = (isVerbose < 0) ? -isVerbose : isVerbose; // output 
   stateIV[MXFCAL] = dimensions[mxfn_POS]; // maximum number of function evaluations
@@ -1268,7 +1270,6 @@ SEXP mer_optimize(SEXP regression)
   // booleans/control
   int isLinearModel = !(MUETA_SLOT(regression) || V_SLOT(regression));
   int isVerbose = dims[verb_POS];
-  int shouldResetCommonScale = FALSE; // !canProfileCommonScale(regression); // should eventually depend on whether or not approximate optimization is in use
   
   // optimization state vectors
   int stateIVLength = S_iv_length(OPT, numOptimizationParameters); // OPT is the optim algorithm type
@@ -1293,7 +1294,7 @@ SEXP mer_optimize(SEXP regression)
   // set initial values
   if (isVerbose) printAllPriors(regression);
   
-  initializeOptimizationParameters(regression, optimizationParameters);
+  copyParametersFromRegression(regression, optimizationParameters);
   
   initializeOptimizerSettings(regression,
                               stateIV, stateIVLength,
@@ -1304,19 +1305,73 @@ SEXP mer_optimize(SEXP regression)
   
   convertOptimizationParametersToConvergence(regression, (const double *) optimizationParameters, convergenceParameters);
   
-  double *deviances = DEV_SLOT(regression);
+  // stateV[34] = getMinNonnegativeParameter(optimizationParameters, boxConstraints, numOptimizationParameters) - 1.0e-3; // LMAX0 - max it can go on first iteration
   
+  MERCache* cache = (isLinearModel ? createLMMCache(regression) : createGLMMCache(regression));
   
   // run the optimization
-  double commonScaleCache = deviances[dims[isREML_POS] ? sigmaREML_POS : sigmaML_POS];
+  double objectiveFunction = R_PosInf;
+  int optimizerHasConverged = 0;
   
-  double deviance = R_PosInf;
+  double* initialOptimizationParameters = Alloca(numOptimizationParameters, double);
+  R_CheckStack();
+  Memcpy(initialOptimizationParameters, (const double*) optimizationParameters, numOptimizationParameters);
+  int currIteration = stateIV[NITER];
+  do {
+    if (isAtBoundary(regression, optimizationParameters)) {
+      // this call can return true unless a prior with no mass on the boundary is used
+      objectiveFunction = INFINITY;
+    } else {
+      // copies the parameters into ST, fixef, and sigma, if necessary
+      copyParametersIntoRegression(regression, (const double*) optimizationParameters);
+      rotateSparseDesignMatrix(regression); // this + copyParametersIntoRegression is equal to the old ST_setPars
+      
+      if (isLinearModel) {
+        objectiveFunction  = lmmGetObjectiveFunction(regression, cache, optimizationParameters);
+      } else {
+        objectiveFunction  = update_dev(regression);
+        objectiveFunction += getPriorPenalty(regression, cache, optimizationParameters);
+      }
+    }
+    
+    S_nlminb_iterate(boxConstraints, optimizationScale, objectiveFunction, g, h, stateIV, stateIVLength,
+                     stateVLength, numOptimizationParameters, stateV, optimizationParameters);
+    optimizerHasConverged = (stateIV[0] != 1 && stateIV[0] != 2);
+  } while (!optimizerHasConverged && stateIV[NITER] == currIteration);
   
-  MERCache *cache = (isLinearModel ? createLMMCache(regression) : NULL);
+  
+  if (optimizerHasConverged) goto mer_optimizer_optimizationComplete;
+  
+  int initialStepHitsBoundary = 0;
+  for (int i = 0; i < numOptimizationParameters; ++i) {
+    double lowerBound = boxConstraints[2 * i];
+    double upperBound = boxConstraints[2 * i + 1];
+    initialStepHitsBoundary = (optimizationParameters[i] <= lowerBound || optimizationParameters[i] >= upperBound);
+    if (initialStepHitsBoundary) break;
+  }
+  
+  if (initialStepHitsBoundary) {
+    // completely arbitrary scaling back
+    for (int i = 0; i < numOptimizationParameters; ++i) {
+      double delta = 0.9 * (optimizationParameters[i] - initialOptimizationParameters[i]);
+      optimizationParameters[i] = initialOptimizationParameters[i] + delta;
+    }
+    
+    // update the regression object with new parameters
+    copyParametersIntoRegression(regression, (const double*) optimizationParameters);
+    rotateSparseDesignMatrix(regression);
+    
+    if (isLinearModel) {
+      lmmGetObjectiveFunction(regression, cache, optimizationParameters);
+    } else {
+      update_dev(regression);
+      getPriorPenalty(regression, cache, optimizationParameters);
+    }
+  }
   
   int isMajorIteration;
   int prevIteration = stateIV[NITER];
-  int currIteration;
+  
   do {
     currIteration = stateIV[NITER];
     isMajorIteration = (prevIteration != currIteration);
@@ -1327,54 +1382,54 @@ SEXP mer_optimize(SEXP regression)
       // only check for convergence every major iteration (i.e. not on calls to approximate the gradient)
       prevIteration = currIteration;
       
-      Memcpy(oldConvergenceParameters, (const double *) convergenceParameters, numConvergenceParameters);
-      convertOptimizationParametersToConvergence(regression, (const double *) optimizationParameters, convergenceParameters);
+      Memcpy(oldConvergenceParameters, (const double*) convergenceParameters, numConvergenceParameters);
+      convertOptimizationParametersToConvergence(regression, (const double*) optimizationParameters, convergenceParameters);
 
       if (allApproximatelyEqual(convergenceParameters, oldConvergenceParameters, numConvergenceParameters, 1.0e-10)) {
-        stateIV[0] = 6; // absolute function convergence
+        stateIV[0] = 4; // relative function convergence
         break;
       }
-    } else if (shouldResetCommonScale) {
-      deviances[dims[isREML_POS] ? sigmaREML_POS : sigmaML_POS] = commonScaleCache;
     }
     
     if (isAtBoundary(regression, optimizationParameters)) {
       // this call can return true unless a prior with no mass on the boundary is used
-      deviance = INFINITY;
+      objectiveFunction = INFINITY;
     } else {
       // copies the parameters into ST, fixef, and sigma, if necessary
-      updateRegressionWithParameters(regression, (const double *) optimizationParameters);
-
+      copyParametersIntoRegression(regression, (const double*) optimizationParameters);
+      rotateSparseDesignMatrix(regression); // this + copyParametersIntoRegression is equal to the old ST_setPars
       
       if (isLinearModel) {
-        deviance = lmmCalculateDeviance(regression, cache);
+        objectiveFunction  = lmmGetObjectiveFunction(regression, cache, optimizationParameters);
       } else {
-        rotateSparseDesignMatrix(regression); // this + updateRegression is equal to the old ST_setPars
-        deviance = update_dev(regression);
+        objectiveFunction  = update_dev(regression);
+        objectiveFunction += getPriorPenalty(regression, cache, optimizationParameters);
       }
-    
-      deviance += calculatePriorPenalty(regression, optimizationParameters);
     }
-    
-    if (isMajorIteration) commonScaleCache = deviances[dims[isREML_POS] ? sigmaREML_POS : sigmaML_POS];
         
-    S_nlminb_iterate(boxConstraints, optimizationScale, deviance, g, h, stateIV, stateIVLength,
+    S_nlminb_iterate(boxConstraints, optimizationScale, objectiveFunction, g, h, stateIV, stateIVLength,
                      stateVLength, numOptimizationParameters, stateV, optimizationParameters);
-  } while (stateIV[0] == 1 || stateIV[0] == 2); // continue while no convergence and no error;
+    optimizerHasConverged = (stateIV[0] != 1 && stateIV[0] != 2);
+  } while (!optimizerHasConverged); // continue while no convergence and no error;
   
   DEBUG_PRINT_ARRAY("par", optimizationParameters, numOptimizationParameters);
   
-  updateRegressionWithParameters(regression, (const double *) optimizationParameters);
+mer_optimizer_optimizationComplete:
+  copyParametersIntoRegression(regression, (const double*) optimizationParameters);
+  rotateSparseDesignMatrix(regression);
   
+  // calculate dev one last time once parameters are restored from last gradient exploratory step
   if (isLinearModel) {
-    lmmCalculateDeviance(regression, cache);
+    lmmGetObjectiveFunction(regression, cache, optimizationParameters);
+    lmmFinalizeOptimization(regression, cache);
+    
     deleteLMMCache(cache);
   } else {
-    rotateSparseDesignMatrix(regression);
     update_dev(regression);
     // glmms are computed without building other matrix factors as we've
-    // optimized over the fixed effects
+    // optimized numerically over the fixed effects
     updateRemainingAugmentedDesignMatrixFactors(regression);
+    deleteGLMMCache(cache);
   }
   
   update_ranef(regression);
@@ -1458,53 +1513,6 @@ SEXP mer_ST_setPars(SEXP x, SEXP pars)
 }
 
 /**
- * Update the whole model for a new set of ST parameters.
- * The only difference between this and a call to update_dev
- * is that the A matrix is also modified.
- *
- * @param regression a bmer object
- *
- * @return updated deviance
- */
-SEXP bmer_get_dev(SEXP regression)
-{
-  int isLinearModel = !(MUETA_SLOT(regression) || V_SLOT(regression));
-  
-  if (isLinearModel) {
-    MERCache *cache = createLMMCache(regression);
-    SEXP result = ScalarReal(lmmCalculateDeviance(regression, cache));
-    deleteLMMCache(cache);
-    return (result);
-  }
-  
-  rotateSparseDesignMatrix(regression);
-    
-  return(ScalarReal(update_dev(regression)));
-}
-
-/**
- * For whatever values of ST and sigma are stored in the model,
- * propagate whatever changes are necessary to compute the deviance.
- * Approximation in this case implies that sigma is not profiled out,
- * and that the approximation is more that less profiling takes place.
- *
- * @param regression a bmer object
- *
- * @return updated deviance
- */
-SEXP bmer_approximate_dev(SEXP regression)
-{
-  int isLinearModel = !(MUETA_SLOT(regression) || V_SLOT(regression));
-  
-  if (!isLinearModel) error("Approximate deviance not defined for glmm or nlmm.");
-  
-  MERCache *cache = createLMMCache(regression);
-  SEXP result = ScalarReal(lmmApproximateDeviance(regression, cache));
-  deleteLMMCache(cache);
-  return (result);
-}
-
-/**
  * Update the deviance vector in GLMMs, NLMMs and GNLMMs
  * If nAGQ > 1, adaptive Gauss-Hermite quadrature is applied.
  *
@@ -1566,13 +1574,17 @@ SEXP mer_update_u(SEXP x){return ScalarInteger(update_u(x));}
  */
 SEXP mer_update_projection(SEXP x)
 {
+  int isLinearModel = !MUETA_SLOT(x) && !V_SLOT(x);
+  
+  if (!isLinearModel) error("incompatible argument to mer_update_projection, requires lmm");
+  
   SEXP ans = PROTECT(allocVector(VECSXP, 2));
-  int *dims = DIMS_SLOT(x);
+  const int* dims = DIMS_SLOT(x);
   
   SET_VECTOR_ELT(ans, 0, allocVector(REALSXP, dims[q_POS]));
   SET_VECTOR_ELT(ans, 1, allocVector(REALSXP, dims[p_POS]));
   
-  calculateProjectionsForSingleArgumentAnova(x, REAL(VECTOR_ELT(ans, 0)), REAL(VECTOR_ELT(ans, 1)));
+  lmmCalculateProjectionsForSingleArgumentAnova(x, REAL(VECTOR_ELT(ans, 0)), REAL(VECTOR_ELT(ans, 1)));
   
   UNPROTECT(1);
   return ans;
@@ -1627,7 +1639,7 @@ SEXP mer_validate(SEXP x)
   const int n = dd[n_POS], nAGQ = dd[nAGQ_POS],
 	nt = dd[nt_POS], nfl = LENGTH(flistP),
 	p = dd[p_POS], q = dd[q_POS], s = dd[s_POS];
-  int nq, nv = n * s;
+  int nv = n * s;
   CHM_SP Zt = Zt_SLOT(x), A =  A_SLOT(x);
   CHM_FR L = L_SLOT(x);
   char *buf = Alloca(BUF_SIZE + 1, char);
@@ -1681,12 +1693,10 @@ SEXP mer_validate(SEXP x)
   if (chkDims(buf, BUF_SIZE, x, lme4_RZXSym, q, p)) return(mkString(buf));
   if (chkDims(buf, BUF_SIZE, x, lme4_RXSym, p, p)) return(mkString(buf));
   
-  nq = 0;
   for (int i = 0; i < LENGTH(flistP); i++) {
     SEXP fli = VECTOR_ELT(flistP, i);
     if (!isFactor(fli))
 	    return mkString(_("flist must be a list of factors"));
-    /* 	nq += dm[0] * LENGTH(getAttrib(fli, R_LevelsSymbol)); */
   }
   for (int i = 0; i < nt; i++) {
     SEXP STi = VECTOR_ELT(ST, i);
@@ -1697,10 +1707,5 @@ SEXP mer_validate(SEXP x)
     if (Gp[i] > Gp[i + 1])
 	    return mkString(_("Gp must be non-decreasing"));
   }
-#if 0
-  /* FIXME: Need to incorporate the assign attribute in the calculation of nq */
-  if (q != nq)
-    return mkString(_("q is not sum of columns by levels"));
-#endif
   return ScalarLogical(1);
 }
