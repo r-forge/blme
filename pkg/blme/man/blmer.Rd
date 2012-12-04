@@ -325,8 +325,8 @@ The default is an improper inverse gamma distribution with both parameters as 0,
   y.z <- (y - mean(y)) / sigma;
   g <- 1:8
   
-  model1 <- blmer(y.z ~ 1 + (1 | g), var.prior = "point",
-                  cov.prior = NULL, fixef.prior = NULL);
+  (schools <- blmer(y.z ~ 1 + (1 | g), var.prior = "point",
+                   cov.prior = NULL, fixef.prior = NULL));
 }
 \keyword{models}
 \keyword{methods}

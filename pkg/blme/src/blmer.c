@@ -483,8 +483,11 @@ int commonScaleRequiresOptimization(SEXP regression)
  * set that the optimizer chooses where a parameter is at the boundary.
  * This checks against that happening and we simply throw it back to
  * the optimizer.
+ *
+ * It should definitely be more specific and check that the parameter
+ * goes to 0 at 0.
  */
-int isAtBoundary(SEXP regression, double *parameters)
+int priorsProhibitParameters(SEXP regression, double *parameters)
 {
   const int* dims = DIMS_SLOT(regression);
   SEXP stList    = GET_SLOT(regression, lme4_STSym);

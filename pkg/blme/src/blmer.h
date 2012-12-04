@@ -15,7 +15,7 @@ void convertOptimizationParametersToConvergence(SEXP regression, const double* s
 void copyParametersFromRegression(SEXP regression, double* parameters);
 void copyParametersIntoRegression(SEXP regression, const double* parameters);
 
-int isAtBoundary(SEXP regression, double* parameters);
+int priorsProhibitParameters(SEXP regression, double* parameters);
 
 double getPriorPenalty(SEXP regression, MERCache* cache, const double* parameters);
 

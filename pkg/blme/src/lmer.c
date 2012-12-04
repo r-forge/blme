@@ -1249,6 +1249,34 @@ static void initializeOptimizerSettings(SEXP regression,
   for (int i = 0; i < numOptimizationParameters; i++) optimizationScale[i] = 1.0;
 }
 
+static int isAtBoundary(const double* parameters, const double* constraints, int numParameters)
+{
+  for (int i = 0; i < numParameters; ++i) {
+    double lowerBound = constraints[2 * i];
+    double upperBound = constraints[2 * i + 1];
+    if (parameters[i] <= lowerBound || parameters[i] >= upperBound) return(1);
+  }
+  return(0);
+}
+
+static double updateWithParametersAndCalcuateObjectiveFunction(SEXP regression, MERCache* cache, double* parameters)
+{
+  int isLinearModel = !(MUETA_SLOT(regression) || V_SLOT(regression));
+  
+  // copies the parameters into ST, fixef, and sigma, if necessary
+  copyParametersIntoRegression(regression, (const double*) parameters);
+  rotateSparseDesignMatrix(regression); // this + copyParametersIntoRegression is equal to the old ST_setPars
+  
+  double result;
+  if (isLinearModel) {
+    result = lmmGetObjectiveFunction(regression, cache, parameters);
+  } else {
+    result  = update_dev(regression);
+    result += getPriorPenalty(regression, cache, parameters);
+  }
+  return(result);
+}
+
 /**
  * Optimize the profiled deviance of an lmer object or the Laplace
  * approximation to the deviance of a nlmer or glmer object.
@@ -1280,9 +1308,10 @@ SEXP mer_optimize(SEXP regression)
   
   // we optimize on one scale, assess convergence on a second, and let the native lmer code do its
   // thing possibly in a third
-  double *optimizationParameters   = Alloca(numOptimizationParameters, double);
-  double *convergenceParameters    = Alloca(numConvergenceParameters, double);
-  double *oldConvergenceParameters = Alloca(numConvergenceParameters, double);
+  double* optimizationParameters    = Alloca(numOptimizationParameters, double);
+  double* oldOptimizationParameters = Alloca(numOptimizationParameters, double);
+  double* convergenceParameters     = Alloca(numConvergenceParameters, double);
+  double* oldConvergenceParameters  = Alloca(numConvergenceParameters, double);
   
   double *g = (double *) NULL;
   double *h = (double *) NULL;
@@ -1304,117 +1333,97 @@ SEXP mer_optimize(SEXP regression)
   setBoxConstraints(regression, boxConstraints);
   
   convertOptimizationParametersToConvergence(regression, (const double *) optimizationParameters, convergenceParameters);
+  Memcpy(oldOptimizationParameters, (const double*) optimizationParameters, numOptimizationParameters);
   
   // stateV[34] = getMinNonnegativeParameter(optimizationParameters, boxConstraints, numOptimizationParameters) - 1.0e-3; // LMAX0 - max it can go on first iteration
   
   MERCache* cache = (isLinearModel ? createLMMCache(regression) : createGLMMCache(regression));
   
   // run the optimization
-  double objectiveFunction = R_PosInf;
-  int optimizerHasConverged = 0;
-  
-  double* initialOptimizationParameters = Alloca(numOptimizationParameters, double);
-  R_CheckStack();
-  Memcpy(initialOptimizationParameters, (const double*) optimizationParameters, numOptimizationParameters);
-  int currIteration = stateIV[NITER];
-  do {
-    if (isAtBoundary(regression, optimizationParameters)) {
-      // this call can return true unless a prior with no mass on the boundary is used
-      objectiveFunction = INFINITY;
-    } else {
-      // copies the parameters into ST, fixef, and sigma, if necessary
-      copyParametersIntoRegression(regression, (const double*) optimizationParameters);
-      rotateSparseDesignMatrix(regression); // this + copyParametersIntoRegression is equal to the old ST_setPars
-      
-      if (isLinearModel) {
-        objectiveFunction  = lmmGetObjectiveFunction(regression, cache, optimizationParameters);
-      } else {
-        objectiveFunction  = update_dev(regression);
-        objectiveFunction += getPriorPenalty(regression, cache, optimizationParameters);
-      }
-    }
-    
-    S_nlminb_iterate(boxConstraints, optimizationScale, objectiveFunction, g, h, stateIV, stateIVLength,
-                     stateVLength, numOptimizationParameters, stateV, optimizationParameters);
-    optimizerHasConverged = (stateIV[0] != 1 && stateIV[0] != 2);
-  } while (!optimizerHasConverged && stateIV[NITER] == currIteration);
-  
-  
-  if (optimizerHasConverged) goto mer_optimizer_optimizationComplete;
-  
-  int initialStepHitsBoundary = 0;
-  for (int i = 0; i < numOptimizationParameters; ++i) {
-    double lowerBound = boxConstraints[2 * i];
-    double upperBound = boxConstraints[2 * i + 1];
-    initialStepHitsBoundary = (optimizationParameters[i] <= lowerBound || optimizationParameters[i] >= upperBound);
-    if (initialStepHitsBoundary) break;
-  }
-  
-  if (initialStepHitsBoundary) {
-    // completely arbitrary scaling back
-    for (int i = 0; i < numOptimizationParameters; ++i) {
-      double delta = 0.9 * (optimizationParameters[i] - initialOptimizationParameters[i]);
-      optimizationParameters[i] = initialOptimizationParameters[i] + delta;
-    }
-    
-    // update the regression object with new parameters
-    copyParametersIntoRegression(regression, (const double*) optimizationParameters);
-    rotateSparseDesignMatrix(regression);
-    
-    if (isLinearModel) {
-      lmmGetObjectiveFunction(regression, cache, optimizationParameters);
-    } else {
-      update_dev(regression);
-      getPriorPenalty(regression, cache, optimizationParameters);
-    }
-  }
-  
-  int isMajorIteration;
-  int prevIteration = stateIV[NITER];
+  double objectiveFunction    = R_PosInf;
+  double oldObjectiveFunction = R_PosInf;
+  int isGradientIteration;
+  int prevIteration = stateIV[NITER]; int currIteration = stateIV[NITER];
+  double stepScaleFactor = 0.2; // we'll power this down as we go
+  int continueOptimization = 0;
   
   do {
     currIteration = stateIV[NITER];
-    isMajorIteration = (prevIteration != currIteration);
+    isGradientIteration = (prevIteration == currIteration);
     
     DEBUG_PRINT_ARRAY("par", optimizationParameters, numOptimizationParameters);
-        
-    if (isMajorIteration) {
-      // only check for convergence every major iteration (i.e. not on calls to approximate the gradient)
+    
+    if (priorsProhibitParameters(regression, optimizationParameters)) {
+      // this call can return true unless a prior with no mass on the boundary is used
+      objectiveFunction = R_PosInf;
+    } else {
+      objectiveFunction = updateWithParametersAndCalcuateObjectiveFunction(regression, cache, optimizationParameters);
+    }
+    
+    if (currIteration == 0 && !R_finite(oldObjectiveFunction)) oldObjectiveFunction = objectiveFunction;
+    
+    
+    //Rprintf("iter: %d, grad: %d, IV[0]: %d, par: %.8f", stateIV[NITER], stateIV[29], stateIV[0], optimizationParameters[0]);
+    //for (int i = 1; i < numOptimizationParameters; ++i) Rprintf(", %.8f", optimizationParameters[i]);
+    //Rprintf(", obj: %.8f\n", objectiveFunction);
+    
+    if (!isGradientIteration && objectiveFunction < oldObjectiveFunction) {
       prevIteration = currIteration;
+      //Rprintf("  majIter\n");
+      
+      // if the optimizer wants to take a step to the boundary, make sure that it is "certain"
+      // more specifically: scale back the step by a factor that decreases the more often a
+      // gradient step pushes it to the boundary
+      if (isAtBoundary(optimizationParameters, boxConstraints, numOptimizationParameters)) {
+        double delta[numOptimizationParameters];
+        
+        for (int i = 0; i < numOptimizationParameters; ++i) delta[i] = optimizationParameters[i] - oldOptimizationParameters[i];
+        
+        objectiveFunction = R_PosInf;
+        
+        while (TRUE) {
+          double scaleFactorComp = 1.0 - stepScaleFactor;
+        
+          for (int i = 0; i < numOptimizationParameters; ++i) {
+            optimizationParameters[i] = oldOptimizationParameters[i] + delta[i] * scaleFactorComp;
+          }
+          
+          objectiveFunction = updateWithParametersAndCalcuateObjectiveFunction(regression, cache, optimizationParameters);
+          //Rprintf("  new par: %.8f", optimizationParameters[0]);
+          //for (int i = 1; i < numOptimizationParameters; ++i) Rprintf(", %.8f", optimizationParameters[i]);
+          //Rprintf(", obj: %.8f\n", objectiveFunction);
+          // if we failed in finding a spot with a lower objective, move close to old optim params
+          // since we followed the derivative and the func is continuous, eventually we'll be
+          // so close that it'll be an improvement
+          if (objectiveFunction < oldObjectiveFunction) break;
+          
+          stepScaleFactor = sqrt(stepScaleFactor);
+        }
+        // so that we can get to 0 in the limit, scale back the scaling back
+        stepScaleFactor *= stepScaleFactor;
+        //Rprintf("  stepScaleFactor: %.8f\n", stepScaleFactor);
+      }
       
       Memcpy(oldConvergenceParameters, (const double*) convergenceParameters, numConvergenceParameters);
+      Memcpy(oldOptimizationParameters, (const double*) optimizationParameters, numOptimizationParameters);
+      oldObjectiveFunction = objectiveFunction;
+      
       convertOptimizationParametersToConvergence(regression, (const double*) optimizationParameters, convergenceParameters);
-
       if (allApproximatelyEqual(convergenceParameters, oldConvergenceParameters, numConvergenceParameters, 1.0e-10)) {
         stateIV[0] = 4; // relative function convergence
         break;
       }
     }
-    
-    if (isAtBoundary(regression, optimizationParameters)) {
-      // this call can return true unless a prior with no mass on the boundary is used
-      objectiveFunction = INFINITY;
-    } else {
-      // copies the parameters into ST, fixef, and sigma, if necessary
-      copyParametersIntoRegression(regression, (const double*) optimizationParameters);
-      rotateSparseDesignMatrix(regression); // this + copyParametersIntoRegression is equal to the old ST_setPars
-      
-      if (isLinearModel) {
-        objectiveFunction  = lmmGetObjectiveFunction(regression, cache, optimizationParameters);
-      } else {
-        objectiveFunction  = update_dev(regression);
-        objectiveFunction += getPriorPenalty(regression, cache, optimizationParameters);
-      }
-    }
         
     S_nlminb_iterate(boxConstraints, optimizationScale, objectiveFunction, g, h, stateIV, stateIVLength,
                      stateVLength, numOptimizationParameters, stateV, optimizationParameters);
-    optimizerHasConverged = (stateIV[0] != 1 && stateIV[0] != 2);
-  } while (!optimizerHasConverged); // continue while no convergence and no error;
+    
+    // state == 1 => return func value. state == 2 => return grad value (not super relevant, but part of machinery)
+    continueOptimization = (stateIV[0] != 1 && stateIV[0] != 2);
+  } while (!continueOptimization);
   
   DEBUG_PRINT_ARRAY("par", optimizationParameters, numOptimizationParameters);
   
-mer_optimizer_optimizationComplete:
   copyParametersIntoRegression(regression, (const double*) optimizationParameters);
   rotateSparseDesignMatrix(regression);
   
