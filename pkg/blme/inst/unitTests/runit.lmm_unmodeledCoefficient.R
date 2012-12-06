@@ -50,15 +50,14 @@ test.bmer.blmer.fixefPrior <- function()
                           method="L-BFGS-B", model = testModel, control=list(factr=1e-10));
   } else {
     optimResults <-
-      list(par = c(0.685799044403746, 2.08564789988719, -0.373384163100304, 0.756409679248028,
-             0.715198281598591, 0, -0.429264821216256, -0.820610920839676, 0.690451181761801));
+      list(par = c(0.685799044401953, 2.08564789987389, -0.373384163195289, 0.756409679230464, 0.715198281606338, 0, -0.42926482121343, -0.82061092083679, 0.69045118177096));
   }
     
   blmerFit <- blmer(y ~ x.1 + x.2 + (1 + x.1 | g.1) + (1 + x.1 + x.2 | g.2),
                     cov.prior = NULL, fixef.prior = NULL, var.prior = NULL);
 
   blmerResults <- blme_stMatricesToVector(blmerFit@ST);
-  checkEquals(blmerResults, optimResults$par, tolerance=1e-5);
+  checkEquals(blmerResults, optimResults$par, tolerance=1.5e-5);
 
 
   fixef.prior <- "normal(sd = 1, common.scale = TRUE)";

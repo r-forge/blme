@@ -2,8 +2,10 @@ useDynLib(blme, .registration=TRUE)
 
 import("Matrix")
 
-export("blmer", "bglmer")
+export(blmer, bglmer)
 
-exportClasses("bmer", "summary.bmer")
+exportClasses(bmer, summary.bmer)
 
-exportMethods("summary", "print", "show")
+importClassesFrom("lme4", mer, summary.mer)
+
+exportMethods(summary, print, show)

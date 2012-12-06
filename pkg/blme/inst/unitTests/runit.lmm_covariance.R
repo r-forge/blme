@@ -45,17 +45,17 @@ test.blme.blmer.covarPrior <- function()
     upperBounds <- getUpperBounds(testModel);
 
     startingParameters <- blme_stMatricesToVector(testModel@ST);
-    optimResults <- optim(startingParameters, blme_getObjectiveFunctionForParameters,
+    optimResults <- optim(startingParameters, blme_getObjectiveFunctionForParameters, model = testModel,
                           lower=lowerBounds, upper=upperBounds,
-                          method="L-BFGS-B", model = testModel, control=list(factr=1e-10));
+                          method="L-BFGS-B", control=list(factr=1e-10));
   } else {
-    optimResults <- list(par = c(0.68579905144862, 2.08564801478433, -0.373384320990132, 0.756409621411491, 0.715198300015867, 0, -0.429264936416881, -0.820611001702123, 0.690451125362165));
+    optimResults <- list(par = c(0.685799044401953, 2.08564789987389, -0.373384163195289, 0.756409679230464, 0.715198281606338, 0, -0.42926482121343, -0.82061092083679, 0.69045118177096));
   }
   
   blmerFit <- blmer(y ~ x.1 + x.2 + (1 + x.1 | g.1) + (1 + x.1 + x.2 | g.2),
                     cov.prior = NULL, fixef.prior = NULL, var.prior = NULL);
     
-  checkEquals(blme_stMatricesToVector(blmerFit@ST), optimResults$par, tolerance=1e-5);
+  checkEquals(blme_stMatricesToVector(blmerFit@ST), optimResults$par, tolerance=1.5e-5);
 
 
   cov.prior <- "g.1 ~ gamma(rate = 0.5)";

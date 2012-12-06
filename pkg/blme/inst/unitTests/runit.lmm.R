@@ -13,7 +13,7 @@ test.blme.blmer <- function()
 
   # as.numeric to strip names from blmer ST
   # off-by-one bug fix in blmer means that the two are no longer exactly equal
-  checkEquals(as.numeric(unlist(lmerFit@ST)), as.numeric(unlist(blmerFit@ST)), tolerance = 1e-5);
-  checkEquals(lmerFit@ranef, blmerFit@ranef, tolerance=1.5e-4);
-  checkEquals(lmerFit@fixef, blmerFit@fixef, tolerance=1e-6);
+  checkEquals(as.numeric(unlist(lmerFit@ST)), as.numeric(unlist(blmerFit@ST)), tolerance = 1.5e-5);
+  checkEquals(lmerFit@ranef, blmerFit@ranef, tolerance=2.0e-5);
+  checkEquals(lmerFit@fixef, blmerFit@fixef, tolerance=1.5e-6);
 }

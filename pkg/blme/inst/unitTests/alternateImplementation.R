@@ -234,7 +234,7 @@ blme_getObjectiveFunctionForParameters <- function(parameters, model) {
   }
   
   model@ST <- blme_stVectorToMatrices(stParameters, model@dims[["nt"]], sapply(model@ST, nrow));
-  if (any(sapply(model@ST, diag) < 0)) return(.Machine$double.xmax * .Machine$double.eps);
+  if (any(sapply(model@ST, function(ST) any(diag(ST) < 0)))) return(.Machine$double.xmax * .Machine$double.eps);
   sparseParts <- blme_rotateSparseDesign(model);
   model@A <- sparseParts$A;
   model@Cx <- sparseParts$Cx;
