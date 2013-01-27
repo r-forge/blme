@@ -216,5 +216,5 @@ unmodeledCoefficientPriorToString <- function(regression)
     hyperparameters <- as.numeric(solve(covarianceInverse));
   }
 
-  return(buildStringForFamily(families, scales, hyperparameters, TRUE)$string);
+  return(buildStringForFamily(families, scales, hyperparameters, 2, TRUE)$string);
 }

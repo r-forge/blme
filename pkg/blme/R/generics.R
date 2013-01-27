@@ -198,8 +198,7 @@ printBmerPrior <- function(x, digits = max(3, getOption("digits") - 3))
   } else if (x@type == getEnumOrder(typeEnum, NONE_TYPE_NAME)) {
     return("type: none");
   }
-  hyperparameters <- round(hyperparameters, digits);
-  familyString <- buildStringForFamily(x@families, x@scales, hyperparameters, FALSE);
+  familyString <- buildStringForFamily(x@families, x@scales, hyperparameters, digits, FALSE);
   cat(familyString$string, "\n", sep="");
 }
 

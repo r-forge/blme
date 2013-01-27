@@ -430,7 +430,7 @@ covariancePriorToString <- function(regression)
     cat(factorNames[i], "~ ");
     
     if (prior@type == getEnumOrder(typeEnum, DIRECT_TYPE_NAME)) {
-      cat(buildStringForFamily(families, scales, hyperparameters, TRUE)$string,
+      cat(buildStringForFamily(families, scales, hyperparameters, 2, TRUE)$string,
           "\n", sep = "");
     } else if (prior@type == getEnumOrder(typeEnum, CORRELATION_TYPE_NAME)) {
       coordinateNames <- colnames(regression@ST[[i]]);
@@ -438,7 +438,7 @@ covariancePriorToString <- function(regression)
       cat(typeEnum[prior@type + 1], "\n", sep = "");
       
       for (j in 1:length(coordinateNames)) {
-        familyString <- buildStringForFamily(families, scales, hyperparameters, TRUE);
+        familyString <- buildStringForFamily(families, scales, hyperparameters, 2, TRUE);
         cat("  ", coordinateNames[j], " ~ ", stringResult$familyString, "\n", sep = "");
 
         families <- families[(familyString$numFamilies + 1):length(families)];
@@ -447,14 +447,14 @@ covariancePriorToString <- function(regression)
                                            length(hyperparameters)];
         
       }
-      cat("  ", buildStringForFamily(families, scales, hyperparameters, TRUE), "\n", sep="");
+      cat("  ", buildStringForFamily(families, scales, hyperparameters, 2, TRUE), "\n", sep="");
     } else if (prior@type == getEnumOrder(typeEnum, SPECTRAL_TYPE_NAME)) {
       coordinateNames <- colnames(regression@ST[[i]]);
       
       cat(typeEnum[prior@type + 1], "\n", sep = "");
       
       for (j in 1:length(coordinateNames)) {
-        familyString <- buildStringForFamily(families, scales, hyperparameters, TRUE);
+        familyString <- buildStringForFamily(families, scales, hyperparameters, 2, TRUE);
         cat("  ", j, " ~ ", familyString$string, "\n", sep = "");
         
         families <- families[(familyString$numFamilies + 1):length(families)];

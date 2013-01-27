@@ -177,5 +177,5 @@ commonScalePriorToString <- function(regression)
   scales <- regression@var.prior@scales;
   hyperparameters <- regression@var.prior@hyperparameters;
 
-  return(buildStringForFamily(families, scales, hyperparameters, TRUE)$string);
+  return(buildStringForFamily(families, scales, hyperparameters, 2, TRUE)$string);
 }
