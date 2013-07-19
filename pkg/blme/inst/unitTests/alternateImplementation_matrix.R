@@ -63,7 +63,7 @@ blme_covToSdCor <- function(cov) {
 
 blme_covToSt <- function(cov) {
   TS <- t(chol(cov));
-  S.inv <- diag(1 / diag(TS));
+  S.inv <- diag(1 / diag(TS), nrow(TS));
   ST <- TS %*% S.inv;
   diag(ST) <- diag(TS);
   return(ST);
@@ -140,6 +140,15 @@ blme_ranefChol <- function(model) {
   numRepsPerBlock <- (model@Gp[-1] - model@Gp[-length(model@Gp)]) / factorDims;
 
   return(blme_getBlockCov(Lambdas, numRepsPerBlock));
+}
+
+blme_ranefCholInv <- function(model) {
+  Lambda.invs <- lapply(lapply(model@ST, blme_stToChol), solve);
+  factorDims <- sapply(model@ST, nrow);
+  
+  numRepsPerBlock <- (model@Gp[-1] - model@Gp[-length(model@Gp)]) / factorDims;
+
+  return(blme_getBlockCov(Lambda.invs, numRepsPerBlock)); 
 }
 
 blme_logDetVcov <- function(model) {

@@ -1,4 +1,7 @@
 2012-11-13 10:25  Vincent Dorie <vincent@stat.columbia.edu>
+        * Minor addition to testing suite set of functions. Upgraded to lme4 0.999999-2.
+
+2012-11-13 10:25  Vincent Dorie <vincent@stat.columbia.edu>
         * Common scale is now optional for random effect covariance, specified with the "common.scale" parameter and taking values TRUE/FALSE.
         * Covariance priors can now all be improper.
         * Common scale prior can now be inverse gamma on sd, or gamma.

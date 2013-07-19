@@ -55,7 +55,7 @@ loadCovarianceDefaults <- function(env) {
   env$defaultDirectCommonScale <- COMMON_SCALE_TRUE_NAME;
   env$defaultDirectDataScale <- FREE_SCALE_NAME;
   
-  env$defaultDirectGammaShape <- expression(ifelse(posteriorScale == SD_SCALE_NAME, 2.0, 1.5));
+  env$defaultDirectGammaShape <- expression(ifelse(posteriorScale == SD_SCALE_NAME, 2.5, 1.5));
   env$defaultDirectGammaRate <-
     expression(ifelse(shape > 1,
                       (shape - 1) / ifelse(posteriorScale == SD_SCALE_NAME,
@@ -68,7 +68,7 @@ loadCovarianceDefaults <- function(env) {
     expression(ifelse(posteriorScale == SD_SCALE_NAME, 10^2, 10^4) *
         (shape + 1));
 
-  env$defaultDirectWishartDegreesOfFreedom <- expression(factorDimension + 2);
+  env$defaultDirectWishartDegreesOfFreedom <- expression(factorDimension + 2.5);
   env$defaultDirectWishartScale <-
     expression(diag(10^4 / ifelse(degreesOfFreedom > factorDimension + 1,
                                        degreesOfFreedom - factorDimension - 1,

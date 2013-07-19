@@ -64,7 +64,7 @@ concatenation, and ``\(\mathrm{diag}\)'' the block diagonal matrix
 composed of its arguments. Then,
 \begin{equation*}
 \theta' = \mathrm{vec}_{k=1}^K\mathrm{vec}_{j=1}^{J_k}(\theta_{jk}'),
-\Sigma=\mathrm{diag}_{k=1}^K({\bf I}_{Q_k} \otimes \Sigma_k),
+\Sigma=\mathrm{diag}_{k=1}^K({\bf I}_{J_k} \otimes \Sigma_k),
 {\bf Z}=\mathrm{cat}_{k=1}^K\mathrm{cat}_{j=1}^{J_k}\mathrm{vec}_{i=1}^N
 (z_{ik}^\top\mathbb{I}\{g_k(i)=j\}),
 \end{equation*}
@@ -410,11 +410,11 @@ speed up optimization.
 Regardless of the scale, for the Gaussian case the approach we will take
 is to fold in the prior into a sum of squares term as fake
 data. Specifically, we will go from
-$\left\| \begin{bmatrix}{\bf Y} \\ 0 \\ 0\end{bmatrix}
+$\left\| \begin{bmatrix}{\bf Y} \\ 0\end{bmatrix}
 -\begin{bmatrix} {\bf Z}\Lambda & {\bf X} \\ {\bf I}_Q &
   0\end{bmatrix} \begin{bmatrix}\theta \\ \beta\end{bmatrix}
 \right\|^2$ to something like 
-$\left\| \begin{bmatrix}{\bf Y} \\ 0\end{bmatrix}
+$\left\| \begin{bmatrix}{\bf Y} \\ 0 \\ 0\end{bmatrix}
 -\begin{bmatrix} {\bf Z}\Lambda & {\bf X} \\ 0 & \Sigma_\beta^{1/2} \\
   {\bf I}_Q &
   0\end{bmatrix} \begin{bmatrix}\theta \\ \beta\end{bmatrix}
@@ -971,7 +971,7 @@ p(\sigma \mid {\bf Y}, \Lambda, \tilde\beta) & \propto
 \right\|^2
 + \tau\frac{1}{\tilde\sigma^2}, \\
 \tilde\sigma & = \dfrac{\sqrt{\tau^2 +
-    4\mathrm{df}\times\mathrm{PWRSS}}-\tau}{2\mathrm{df}}.
+    4\mathrm{df}\times\mathrm{PWRSS}}+\tau}{2\mathrm{df}}.
 \end{align*}
 
 For $\sigma \sim \Gamma$, the resultant estimating equation is cubic

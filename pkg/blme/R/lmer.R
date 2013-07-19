@@ -1,6 +1,5 @@
 # lmer, glmer and nlmer plus methods and utilities
 
-
 ### Utilities for parsing the mixed model formula
 
 findbars <- function(term)
@@ -147,7 +146,7 @@ lmerFrames <- function(mc, formula, contrasts, vnms = character(0))
 
     ## The model formula for the fixed-effects terms only.
     fixed.form <- nobars(formula)       # remove any terms with `|'
-    if (inherits(fixed.form, "name"))
+    if (inherits(fixed.form, "formula"))
       # RHS is empty - use `y ~ 1'
       fixed.form <- as.formula(substitute(foo ~ 1, list(foo = fixed.form)))
 
@@ -227,6 +226,7 @@ isNested <- function(f1, f2)
     all(diff(sm@p) < 2)
 }
 
+
 isREML <- function(x, ...) UseMethod("isREML")
 isLMM  <- function(x, ...) UseMethod("isLMM")
 isNLMM <- function(x, ...) UseMethod("isNLMM")
@@ -250,7 +250,6 @@ isNLMM.mer <- function(x,...) {
 ##' @S3method isLMM mer
 isLMM.mer <- function(x,...) as.logical(x@dims["LMM"])
 ## or: is(x@resp,"lmerResp") ?
-
 
 
 ##' dimsNames and devNames are in the package's namespace rather than

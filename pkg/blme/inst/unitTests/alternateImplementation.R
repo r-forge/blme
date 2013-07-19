@@ -1,3 +1,4 @@
+
 blme_getInverseInformation <- function(model) {
   # Xt.sp = sparse part of design matrix, transposed
   # X.dn  = dense part

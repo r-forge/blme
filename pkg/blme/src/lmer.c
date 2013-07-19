@@ -1363,9 +1363,9 @@ SEXP mer_optimize(SEXP regression)
     if (currIteration == 0 && !R_finite(oldObjectiveFunction)) oldObjectiveFunction = objectiveFunction;
     
     
-    //Rprintf("iter: %d, grad: %d, IV[0]: %d, par: %.8f", stateIV[NITER], stateIV[29], stateIV[0], optimizationParameters[0]);
-    //for (int i = 1; i < numOptimizationParameters; ++i) Rprintf(", %.8f", optimizationParameters[i]);
-    //Rprintf(", obj: %.8f\n", objectiveFunction);
+    // Rprintf("iter: %d, grad: %d, IV[0]: %d, par: %.8f", stateIV[NITER], stateIV[29], stateIV[0], optimizationParameters[0]);
+    // for (int i = 1; i < numOptimizationParameters; ++i) Rprintf(", %.8f", optimizationParameters[i]);
+    // Rprintf(", obj: %.8f\n", objectiveFunction);
     
     if (!isGradientIteration && objectiveFunction < oldObjectiveFunction) {
       prevIteration = currIteration;
@@ -1389,9 +1389,9 @@ SEXP mer_optimize(SEXP regression)
           }
           
           objectiveFunction = updateWithParametersAndCalcuateObjectiveFunction(regression, cache, optimizationParameters);
-          //Rprintf("  new par: %.8f", optimizationParameters[0]);
-          //for (int i = 1; i < numOptimizationParameters; ++i) Rprintf(", %.8f", optimizationParameters[i]);
-          //Rprintf(", obj: %.8f\n", objectiveFunction);
+          // Rprintf("  new par: %.8f", optimizationParameters[0]);
+          // for (int i = 1; i < numOptimizationParameters; ++i) Rprintf(", %.8f", optimizationParameters[i]);
+          // Rprintf(", obj: %.8f\n", objectiveFunction);
           // if we failed in finding a spot with a lower objective, move close to old optim params
           // since we followed the derivative and the func is continuous, eventually we'll be
           // so close that it'll be an improvement

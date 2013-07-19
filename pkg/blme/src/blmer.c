@@ -844,6 +844,8 @@ SEXP bmer_getObjectiveFunction(SEXP regression)
     deleteGLMMCache(cache);
   }
   
+  mer_update_ranef(regression);
+  
   return(ScalarReal(result));
 }
 
