@@ -1,21 +1,21 @@
 blme_getPriorDegreesOfFreedom <- function(model) {
-  noneType    <- blme:::getEnumOrder(blme:::typeEnum, blme:::NONE_TYPE_NAME);
-  directType  <- blme:::getEnumOrder(blme:::typeEnum, blme:::DIRECT_TYPE_NAME);
-  #corrType <- blme:::getEnumOrder(blme:::familyEnum, blme:::CORRELATION_TYPE_NAME);
-  #specType <- blme:::getEnumOrder(blme:::familyEnum, blme:::SPECTRAL_TYPE_NAME);
+  noneType    <- blme.0:::getEnumOrder(blme.0:::typeEnum, blme.0:::NONE_TYPE_NAME);
+  directType  <- blme.0:::getEnumOrder(blme.0:::typeEnum, blme.0:::DIRECT_TYPE_NAME);
+  #corrType <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::CORRELATION_TYPE_NAME);
+  #specType <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::SPECTRAL_TYPE_NAME);
   
-  gammaFamily <- blme:::getEnumOrder(blme:::familyEnum, blme:::GAMMA_FAMILY_NAME);
-  invGammaFamily <- blme:::getEnumOrder(blme:::familyEnum, blme:::INVGAMMA_FAMILY_NAME);
-  wishartFamily    <- blme:::getEnumOrder(blme:::familyEnum, blme:::WISHART_FAMILY_NAME);
-  invWishartFamily <- blme:::getEnumOrder(blme:::familyEnum, blme:::INVWISHART_FAMILY_NAME);
-  normalFamily <- blme:::getEnumOrder(blme:::familyEnum, blme:::NORMAL_FAMILY_NAME);
+  gammaFamily <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::GAMMA_FAMILY_NAME);
+  invGammaFamily <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::INVGAMMA_FAMILY_NAME);
+  wishartFamily    <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::WISHART_FAMILY_NAME);
+  invWishartFamily <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::INVWISHART_FAMILY_NAME);
+  normalFamily <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::NORMAL_FAMILY_NAME);
   
-  varOnCommonScale <- blme:::getScaleInt(blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::VAR_SCALE_NAME),
-                                         blme:::getEnumOrder(blme:::commonScaleEnum, blme:::COMMON_SCALE_TRUE_NAME));
-  sdOnCommonScale  <- blme:::getScaleInt(blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::SD_SCALE_NAME),
-                                         blme:::getEnumOrder(blme:::commonScaleEnum, blme:::COMMON_SCALE_TRUE_NAME));
-  varNotOnCommonScale <- blme:::getScaleInt(blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::VAR_SCALE_NAME),
-                                            blme:::getEnumOrder(blme:::commonScaleEnum, blme:::COMMON_SCALE_FALSE_NAME));
+  varOnCommonScale <- blme.0:::getScaleInt(blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::VAR_SCALE_NAME),
+                                         blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::COMMON_SCALE_TRUE_NAME));
+  sdOnCommonScale  <- blme.0:::getScaleInt(blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::SD_SCALE_NAME),
+                                         blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::COMMON_SCALE_TRUE_NAME));
+  varNotOnCommonScale <- blme.0:::getScaleInt(blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::VAR_SCALE_NAME),
+                                            blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::COMMON_SCALE_FALSE_NAME));
   
   getCommonScalePriorDF <- function(model) {
     if (model@var.prior@type[1] != directType) return(0.0);
@@ -24,10 +24,10 @@ blme_getPriorDegreesOfFreedom <- function(model) {
     hyperparameters <- model@var.prior@hyperparameters;
     
     # obviously should be true, but to be consistent
-    onCommonScale <- blme:::getEnumOrder(blme:::commonScaleEnum, blme:::defaultCommonScaleCommonScale);
-    onVarScale    <- blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::VAR_SCALE_NAME);
+    onCommonScale <- blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::defaultCommonScaleCommonScale);
+    onVarScale    <- blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::VAR_SCALE_NAME);
     
-    onVarScale <- model@var.prior@scales[1] == blme:::getScaleInt(onVarScale, onCommonScale);
+    onVarScale <- model@var.prior@scales[1] == blme.0:::getScaleInt(onVarScale, onCommonScale);
 
     result <- 0;
     if (family == gammaFamily) {
@@ -46,10 +46,10 @@ blme_getPriorDegreesOfFreedom <- function(model) {
     result <- 0;
     if (model@fixef.prior@type[1]     == directType &&
         model@fixef.prior@families[1] == normalFamily) {
-      onVarScale    <- blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::defaultUnmodeledCoefficientPosteriorScale);
-      onCommonScale <- blme:::getEnumOrder(blme:::commonScaleEnum, blme:::COMMON_SCALE_TRUE_NAME);
+      onVarScale    <- blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::defaultUnmodeledCoefficientPosteriorScale);
+      onCommonScale <- blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::COMMON_SCALE_TRUE_NAME);
       
-      onCommonScale <- model@fixef.prior@scales[1] == blme:::getScaleInt(onVarScale, onCommonScale);
+      onCommonScale <- model@fixef.prior@scales[1] == blme.0:::getScaleInt(onVarScale, onCommonScale);
       
       if (onCommonScale) result <- result + model@dims[["p"]];
     }
@@ -114,23 +114,23 @@ blme_getPriorDegreesOfFreedom <- function(model) {
 
 
 blme_getCommonScaleExponentialPart <- function(model, parameters) {
-  noneType   <- blme:::getEnumOrder(blme:::typeEnum, blme:::NONE_TYPE_NAME);
-  directType <- blme:::getEnumOrder(blme:::typeEnum, blme:::DIRECT_TYPE_NAME);
-  corrType   <- blme:::getEnumOrder(blme:::typeEnum, blme:::CORRELATION_TYPE_NAME);
-  specType   <- blme:::getEnumOrder(blme:::typeEnum, blme:::SPECTRAL_TYPE_NAME);
+  noneType   <- blme.0:::getEnumOrder(blme.0:::typeEnum, blme.0:::NONE_TYPE_NAME);
+  directType <- blme.0:::getEnumOrder(blme.0:::typeEnum, blme.0:::DIRECT_TYPE_NAME);
+  corrType   <- blme.0:::getEnumOrder(blme.0:::typeEnum, blme.0:::CORRELATION_TYPE_NAME);
+  specType   <- blme.0:::getEnumOrder(blme.0:::typeEnum, blme.0:::SPECTRAL_TYPE_NAME);
   
-  gammaFamily      <- blme:::getEnumOrder(blme:::familyEnum, blme:::GAMMA_FAMILY_NAME);
-  invGammaFamily   <- blme:::getEnumOrder(blme:::familyEnum, blme:::INVGAMMA_FAMILY_NAME);
-  wishartFamily    <- blme:::getEnumOrder(blme:::familyEnum, blme:::WISHART_FAMILY_NAME);
-  invWishartFamily <- blme:::getEnumOrder(blme:::familyEnum, blme:::INVWISHART_FAMILY_NAME);
-  normalFamily     <- blme:::getEnumOrder(blme:::familyEnum, blme:::NORMAL_FAMILY_NAME);
+  gammaFamily      <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::GAMMA_FAMILY_NAME);
+  invGammaFamily   <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::INVGAMMA_FAMILY_NAME);
+  wishartFamily    <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::WISHART_FAMILY_NAME);
+  invWishartFamily <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::INVWISHART_FAMILY_NAME);
+  normalFamily     <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::NORMAL_FAMILY_NAME);
   
-  varOnCommonScale <- blme:::getScaleInt(blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::VAR_SCALE_NAME),
-                                         blme:::getEnumOrder(blme:::commonScaleEnum, blme:::COMMON_SCALE_TRUE_NAME));
-  sdOnCommonScale  <- blme:::getScaleInt(blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::SD_SCALE_NAME),
-                                         blme:::getEnumOrder(blme:::commonScaleEnum, blme:::COMMON_SCALE_TRUE_NAME));
-  varNotOnCommonScale <- blme:::getScaleInt(blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::VAR_SCALE_NAME),
-                                            blme:::getEnumOrder(blme:::commonScaleEnum, blme:::COMMON_SCALE_FALSE_NAME));
+  varOnCommonScale <- blme.0:::getScaleInt(blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::VAR_SCALE_NAME),
+                                         blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::COMMON_SCALE_TRUE_NAME));
+  sdOnCommonScale  <- blme.0:::getScaleInt(blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::SD_SCALE_NAME),
+                                         blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::COMMON_SCALE_TRUE_NAME));
+  varNotOnCommonScale <- blme.0:::getScaleInt(blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::VAR_SCALE_NAME),
+                                            blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::COMMON_SCALE_FALSE_NAME));
   
   getCommonScaleExponentialPart <- function(model) {
     result <- list(mTwo = 0, mOne = 0, two = 0, one = 0);
@@ -141,10 +141,10 @@ blme_getCommonScaleExponentialPart <- function(model, parameters) {
     hyperparameters <- model@var.prior@hyperparameters;
     
     # obviously should be true, but to be consistent
-    onCommonScale <- blme:::getEnumOrder(blme:::commonScaleEnum, blme:::defaultCommonScaleCommonScale);
-    onVarScale    <- blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::VAR_SCALE_NAME);
+    onCommonScale <- blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::defaultCommonScaleCommonScale);
+    onVarScale    <- blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::VAR_SCALE_NAME);
     
-    onVarScale <- model@var.prior@scales[1] == blme:::getScaleInt(onVarScale, onCommonScale);
+    onVarScale <- model@var.prior@scales[1] == blme.0:::getScaleInt(onVarScale, onCommonScale);
       
     if (family == gammaFamily) {
       rate <- hyperparameters[2];
@@ -246,24 +246,24 @@ blme_getCommonScaleExponentialPart <- function(model, parameters) {
 
 
 blme_canProfileCommonScale <- function(model) {
-  noneType   <- blme:::getEnumOrder(blme:::typeEnum, blme:::NONE_TYPE_NAME);
-  directType <- blme:::getEnumOrder(blme:::typeEnum, blme:::DIRECT_TYPE_NAME);
-  corrType   <- blme:::getEnumOrder(blme:::typeEnum, blme:::CORRELATION_TYPE_NAME);
-  specType   <- blme:::getEnumOrder(blme:::typeEnum, blme:::SPECTRAL_TYPE_NAME);
+  noneType   <- blme.0:::getEnumOrder(blme.0:::typeEnum, blme.0:::NONE_TYPE_NAME);
+  directType <- blme.0:::getEnumOrder(blme.0:::typeEnum, blme.0:::DIRECT_TYPE_NAME);
+  corrType   <- blme.0:::getEnumOrder(blme.0:::typeEnum, blme.0:::CORRELATION_TYPE_NAME);
+  specType   <- blme.0:::getEnumOrder(blme.0:::typeEnum, blme.0:::SPECTRAL_TYPE_NAME);
   
-  gammaFamily      <- blme:::getEnumOrder(blme:::familyEnum, blme:::GAMMA_FAMILY_NAME);
-  invGammaFamily   <- blme:::getEnumOrder(blme:::familyEnum, blme:::INVGAMMA_FAMILY_NAME);
-  wishartFamily    <- blme:::getEnumOrder(blme:::familyEnum, blme:::WISHART_FAMILY_NAME);
-  invWishartFamily <- blme:::getEnumOrder(blme:::familyEnum, blme:::INVWISHART_FAMILY_NAME);
-  normalFamily     <- blme:::getEnumOrder(blme:::familyEnum, blme:::NORMAL_FAMILY_NAME);
-  pointFamily      <- blme:::getEnumOrder(blme:::familyEnum, blme:::POINT_FAMILY_NAME);
+  gammaFamily      <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::GAMMA_FAMILY_NAME);
+  invGammaFamily   <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::INVGAMMA_FAMILY_NAME);
+  wishartFamily    <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::WISHART_FAMILY_NAME);
+  invWishartFamily <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::INVWISHART_FAMILY_NAME);
+  normalFamily     <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::NORMAL_FAMILY_NAME);
+  pointFamily      <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::POINT_FAMILY_NAME);
   
-  varOnCommonScale <- blme:::getScaleInt(blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::VAR_SCALE_NAME),
-                                         blme:::getEnumOrder(blme:::commonScaleEnum, blme:::COMMON_SCALE_TRUE_NAME));
-  sdOnCommonScale  <- blme:::getScaleInt(blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::SD_SCALE_NAME),
-                                         blme:::getEnumOrder(blme:::commonScaleEnum, blme:::COMMON_SCALE_TRUE_NAME));
-  varNotOnCommonScale <- blme:::getScaleInt(blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::VAR_SCALE_NAME),
-                                            blme:::getEnumOrder(blme:::commonScaleEnum, blme:::COMMON_SCALE_FALSE_NAME));
+  varOnCommonScale <- blme.0:::getScaleInt(blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::VAR_SCALE_NAME),
+                                         blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::COMMON_SCALE_TRUE_NAME));
+  sdOnCommonScale  <- blme.0:::getScaleInt(blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::SD_SCALE_NAME),
+                                         blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::COMMON_SCALE_TRUE_NAME));
+  varNotOnCommonScale <- blme.0:::getScaleInt(blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::VAR_SCALE_NAME),
+                                            blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::COMMON_SCALE_FALSE_NAME));
 
   covPriorComplicatesCommonScale <- function(family, scale, hyperparameters, factorDimension) {
     onCommonScale <- scale == varOnCommonScale || scale == sdOnCommonScale;
@@ -347,8 +347,8 @@ blme_parametersIncludeCommonScale <- function(model)
 {
   if (blme_canProfileCommonScale(model)) return(FALSE);
 
-  directType  <- blme:::getEnumOrder(blme:::typeEnum, blme:::DIRECT_TYPE_NAME);
-  pointFamily <- blme:::getEnumOrder(blme:::familyEnum, blme:::POINT_FAMILY_NAME);
+  directType  <- blme.0:::getEnumOrder(blme.0:::typeEnum, blme.0:::DIRECT_TYPE_NAME);
+  pointFamily <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::POINT_FAMILY_NAME);
   
   commonScalePrior <- model@var.prior;
   if (commonScalePrior@type == directType) {

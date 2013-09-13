@@ -1,4 +1,4 @@
-cat("\n\nRUnit test cases for bmer:::blmer function with priors on the covariance of the modeled coefficients.\n\n");
+cat("\n\nRUnit test cases for blme:::blmer function with priors on the covariance of the modeled coefficients.\n\n");
 
 test.blme.blmer.covarPrior <- function()
 {

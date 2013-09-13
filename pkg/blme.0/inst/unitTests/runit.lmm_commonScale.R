@@ -1,4 +1,4 @@
-cat("\n\nRUnit test cases for bmer::blmer function with priors on the common scale\n\n");
+cat("\n\nRUnit test cases for blme.0::blmer function with priors on the common scale\n\n");
 
 test.bmer.blmer.varPrior <- function()
 {
@@ -6,7 +6,7 @@ test.bmer.blmer.varPrior <- function()
   generateData <- FALSE;
   cacheOptimizations <- TRUE;
   
-  testRoot <- file.path(path.package(package="blme"), "unitTests");
+  testRoot <- file.path(path.package(package="blme.0"), "unitTests");
   
   # need this to convert st matrices in lmer fit to a vector
   # for comparison against an optim call

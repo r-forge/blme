@@ -1,4 +1,4 @@
-cat("\n\nRUnit test cases for blme:::bmer_matrixTest function\n\n");
+cat("\n\nRUnit test cases for blme.0:::bmer_matrixTest function\n\n");
 
 test.blme.matrix.internals <- function()
 {

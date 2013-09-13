@@ -1,10 +1,10 @@
-cat("\n\nRUnit test cases for blme::blmer function\n\n");
+cat("\n\nRUnit test cases for blme.0::blmer function\n\n");
 
 # simple test to see if blmer can match lmer in output
 test.blme.blmer <- function()
 {
   generateData <- FALSE;
-  testRoot <- file.path(path.package(package="blme"), "unitTests");  
+  testRoot <- file.path(path.package(package="blme.0"), "unitTests");  
   source(file.path(testRoot, "lmmData.R"), TRUE);
 
   lmerFit  <-  lmer(y ~ x.1 + x.2 + (1 + x.1 | g.1) + (1 + x.1 + x.2 | g.2));

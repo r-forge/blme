@@ -1,11 +1,11 @@
-cat("\n\nRUnit test cases for errors and warnings in blme:::parsePrior function, cov.prior argument\n\n");
+cat("\n\nRUnit test cases for errors and warnings in blme.0:::parsePrior function, cov.prior argument\n\n");
 
 
 test.blme.parsePrior.cov.prior.exceptions <- function()
 {
   generateData <- FALSE;
   
-  testRoot <- file.path(path.package(package="blme"), "unitTests");
+  testRoot <- file.path(path.package(package="blme.0"), "unitTests");
   source(file.path(testRoot, "checkWarning.R"), TRUE);
   source(file.path(testRoot, "lmmData.R"), TRUE);
 
@@ -19,7 +19,7 @@ test.blme.parsePrior.cov.prior.exceptions <- function()
   RUnitOptions$silent <- TRUE;
   options("RUnit" = RUnitOptions);
 
-  parsePrior <- blme:::parsePrior;
+  parsePrior <- blme.0:::parsePrior;
   
   # Morally speaking, parsePrior isn't exposed to the user
   # so perhaps this first set of tests is excessive.

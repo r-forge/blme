@@ -64,7 +64,7 @@ function(formula, data, family = gaussian, start = NULL,
     if(is.function(family)) family <- family()
     if(!is.list(family) || is.null(family$family))
       stop(gettextf("family '%s' not recognized", deparse(substitute(family)),
-                    domain = "R-lme4"))
+                    domain = "R-lme4.0"))
     if(family$family == "gaussian" && family$link == "identity") {
         mc[[1]] <- as.name("blmer")      # use blmer not bglmer
         mc$family <- NULL

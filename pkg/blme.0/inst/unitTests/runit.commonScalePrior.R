@@ -1,10 +1,10 @@
-cat("\n\nRUnit test cases for blme:::parsePrior function, var.prior argument\n\n");
+cat("\n\nRUnit test cases for blme.0:::parsePrior function, var.prior argument\n\n");
 
 test.blme.parsePrior.var.prior <- function()
 {
   generateData <- FALSE;
   
-  testRoot <- file.path(path.package(package="blme"), "unitTests");
+  testRoot <- file.path(path.package(package="blme.0"), "unitTests");
   source(file.path(testRoot, "lmmData.R"), TRUE);
 
   options(warn = -1);
@@ -12,13 +12,13 @@ test.blme.parsePrior.var.prior <- function()
                   cov.prior = NULL, fixef.prior = NULL, var.prior = NULL);
   options(warn = 0);
 
-  parsePrior <- blme:::parsePrior;
-  getScaleInt <- blme:::getScaleInt;
-  getEnumOrder <- blme:::getEnumOrder;
-  typeEnum <- blme:::typeEnum;
-  familyEnum <- blme:::familyEnum;
-  posteriorScaleEnum <- blme:::posteriorScaleEnum;
-  commonScaleEnum <- blme:::commonScaleEnum;
+  parsePrior <- blme.0:::parsePrior;
+  getScaleInt <- blme.0:::getScaleInt;
+  getEnumOrder <- blme.0:::getEnumOrder;
+  typeEnum <- blme.0:::typeEnum;
+  familyEnum <- blme.0:::familyEnum;
+  posteriorScaleEnum <- blme.0:::posteriorScaleEnum;
+  commonScaleEnum <- blme.0:::commonScaleEnum;
   
   
   prior <- parsePrior(model1, var.prior = "point(2)");
@@ -50,7 +50,7 @@ test.blme.parsePrior.var.prior <- function()
     checkEquals(prior@families[1], getEnumOrder(familyEnum, "point"));
     checkEquals(prior@hyperparameters, 2);
     scaleInt <- getScaleInt(getEnumOrder(posteriorScaleEnum, "sd"),
-                            getEnumOrder(commonScaleEnum, blme:::defaultCommonScaleCommonScale));
+                            getEnumOrder(commonScaleEnum, blme.0:::defaultCommonScaleCommonScale));
     checkEquals(prior@scales[1], scaleInt);
   }
 
@@ -63,7 +63,7 @@ test.blme.parsePrior.var.prior <- function()
     checkEquals(prior@families[1], getEnumOrder(familyEnum, "point"));
     checkEquals(prior@hyperparameters, 2);
     scaleInt <- getScaleInt(getEnumOrder(posteriorScaleEnum, "var"),
-                            getEnumOrder(commonScaleEnum, blme:::defaultCommonScaleCommonScale));
+                            getEnumOrder(commonScaleEnum, blme.0:::defaultCommonScaleCommonScale));
     checkEquals(prior@scales[1], scaleInt);
   }
 
@@ -95,7 +95,7 @@ test.blme.parsePrior.var.prior <- function()
     checkEquals(prior@families[1], getEnumOrder(familyEnum, "inverse.gamma"));
     checkEquals(prior@hyperparameters, c(3, 0));
     scaleInt <- getScaleInt(getEnumOrder(posteriorScaleEnum, "sd"),
-                            getEnumOrder(commonScaleEnum, blme:::defaultCommonScaleCommonScale));
+                            getEnumOrder(commonScaleEnum, blme.0:::defaultCommonScaleCommonScale));
     checkEquals(prior@scales[1], scaleInt);
   }
 
@@ -127,7 +127,7 @@ test.blme.parsePrior.var.prior <- function()
     checkEquals(prior@families[1], getEnumOrder(familyEnum, "gamma"));
     checkEquals(prior@hyperparameters, c(1, 0));
     scaleInt <- getScaleInt(getEnumOrder(posteriorScaleEnum, "sd"),
-                            getEnumOrder(commonScaleEnum, blme:::defaultCommonScaleCommonScale));
+                            getEnumOrder(commonScaleEnum, blme.0:::defaultCommonScaleCommonScale));
     checkEquals(prior@scales[1], scaleInt);
   }
 }

@@ -1,4 +1,4 @@
-cat("\n\nRUnit test cases for bmer::blmer function with priors on the unmodeled coefficients\n\n");
+cat("\n\nRUnit test cases for blme.0::blmer function with priors on the unmodeled coefficients\n\n");
 
 test.bmer.blmer.fixefPrior <- function()
 {
@@ -6,7 +6,7 @@ test.bmer.blmer.fixefPrior <- function()
   generateData <- FALSE;
   cacheOptimizations <- TRUE;
   
-  testRoot <- file.path(path.package(package="blme"), "unitTests");
+  testRoot <- file.path(path.package(package="blme.0"), "unitTests");
   
   source(file.path(testRoot, "lmmData.R"), TRUE);
   

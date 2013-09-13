@@ -1,11 +1,11 @@
-cat("\n\nRUnit test cases for blme:::parsePrior function, fixef.prior argument\n\n");
+cat("\n\nRUnit test cases for blme.0:::parsePrior function, fixef.prior argument\n\n");
 
 
 test.blme.parsePrior.fixef.prior <- function()
 {
   generateData <- FALSE;
   
-  testRoot <- file.path(path.package(package="blme"), "unitTests");
+  testRoot <- file.path(path.package(package="blme.0"), "unitTests");
   
   source(file.path(testRoot, "lmmData.R"), TRUE);
   source(file.path(testRoot, "checkWarning.R"), TRUE);
@@ -16,13 +16,13 @@ test.blme.parsePrior.fixef.prior <- function()
                   cov.prior = NULL, fixef.prior = NULL, var.prior = NULL);
   options(warn = 0);
 
-  parsePrior <- blme:::parsePrior;
-  getEnumOrder <- blme:::getEnumOrder;
-  getScaleInt <- blme:::getScaleInt;
-  typeEnum <- blme:::typeEnum;
-  familyEnum <- blme:::familyEnum;
-  posteriorScaleEnum <- blme:::posteriorScaleEnum;
-  commonScaleEnum <- blme:::commonScaleEnum;
+  parsePrior <- blme.0:::parsePrior;
+  getEnumOrder <- blme.0:::getEnumOrder;
+  getScaleInt <- blme.0:::getScaleInt;
+  typeEnum <- blme.0:::typeEnum;
+  familyEnum <- blme.0:::familyEnum;
+  posteriorScaleEnum <- blme.0:::posteriorScaleEnum;
+  commonScaleEnum <- blme.0:::commonScaleEnum;
   
   prior <- parsePrior(model1, fixef.prior = "normal(data.scale = 'absolute')");
   {
@@ -51,7 +51,7 @@ test.blme.parsePrior.fixef.prior <- function()
     checkEquals(length(prior@hyperparameters), 2);
     checkEquals(prior@families[1], getEnumOrder(familyEnum, "normal"));
     checkEquals(prior@hyperparameters, c(2.0 * 2.0 * log(1.5), 1 / 1.5));
-    scaleInt <- getScaleInt(getEnumOrder(posteriorScaleEnum, blme:::defaultUnmodeledCoefficientPosteriorScale),
+    scaleInt <- getScaleInt(getEnumOrder(posteriorScaleEnum, blme.0:::defaultUnmodeledCoefficientPosteriorScale),
                             getEnumOrder(commonScaleEnum, 'false'));
     checkEquals(prior@scales[1], scaleInt);
   }
@@ -64,7 +64,7 @@ test.blme.parsePrior.fixef.prior <- function()
     checkEquals(length(prior@hyperparameters), 1 + 2);
     checkEquals(prior@families[1], getEnumOrder(familyEnum, "normal"));
     checkEquals(prior@hyperparameters, c(0, rep(1, 2)));
-    scaleInt <- getScaleInt(getEnumOrder(posteriorScaleEnum, blme:::defaultUnmodeledCoefficientPosteriorScale),
+    scaleInt <- getScaleInt(getEnumOrder(posteriorScaleEnum, blme.0:::defaultUnmodeledCoefficientPosteriorScale),
                             getEnumOrder(commonScaleEnum, 'false'));
     checkEquals(prior@scales[1], scaleInt);
   }
@@ -81,7 +81,7 @@ test.blme.parsePrior.fixef.prior <- function()
     checkEquals(length(prior@hyperparameters), 1 + 2 * 4);
     checkEquals(prior@families[1], getEnumOrder(familyEnum, "normal"));
     checkEquals(prior@hyperparameters, c(logDetCov, leftFactor, covariance.inv));
-    scaleInt <- getScaleInt(getEnumOrder(posteriorScaleEnum, blme:::defaultUnmodeledCoefficientPosteriorScale),
+    scaleInt <- getScaleInt(getEnumOrder(posteriorScaleEnum, blme.0:::defaultUnmodeledCoefficientPosteriorScale),
                             getEnumOrder(commonScaleEnum, 'false'));
     checkEquals(prior@scales[1], scaleInt);
   }
@@ -112,10 +112,10 @@ test.blme.parsePrior.fixef.prior <- function()
   RUnitOptions$silent <- TRUE;
   options("RUnit" = RUnitOptions);
   
-  checkException(blme:::parsePrior(model1, fixef.prior = "normal(common.scale = 'crazy')"));
-  checkException(blme:::parsePrior(model1, fixef.prior = "normal(cov = diag(3))"));
+  checkException(blme.0:::parsePrior(model1, fixef.prior = "normal(common.scale = 'crazy')"));
+  checkException(blme.0:::parsePrior(model1, fixef.prior = "normal(cov = diag(3))"));
   negDefiniteMatrix <- matrix(c(1, 0, 0, -0.1), 2, 2);
-  checkException(blme:::parsePrior(model1, fixef.prior = "normal(cov = negDefiniteMatrix)"));
+  checkException(blme.0:::parsePrior(model1, fixef.prior = "normal(cov = negDefiniteMatrix)"));
   asymmetricMatrix <- matrix(c(1, 0.5, 0.3, 0.7), 2, 2);
-  checkException(blme:::parsePrior(model1, fixef.prior = "normal(cov = asymmetricMatrix)"));
+  checkException(blme.0:::parsePrior(model1, fixef.prior = "normal(cov = asymmetricMatrix)"));
 }

@@ -1,4 +1,4 @@
-cat("\n\nRUnit test cases for bmer::blmer function with priors on the common scale\n\n");
+cat("\n\nRUnit test cases for blme::blmer function with priors on the common scale\n\n");
 
 test.bmer.blmer.varPrior <- function()
 {

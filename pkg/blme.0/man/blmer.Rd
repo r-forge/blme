@@ -7,7 +7,7 @@
 \description{
   Maximum a posteriori estimation for linear and generalized
   linear mixed-effects models in a Bayesian setting. Extension
-  of, and similar to, \code{\link[lme4]{lmer}}.
+  of, and similar to, \code{\link[lme4.0]{lmer}}.
 }
 \usage{
 blmer(formula, data, family = NULL, REML = TRUE,
@@ -49,15 +49,15 @@ bglmer(formula, data, family = gaussian, start = NULL,
     optimization.}
   \item{formula, data, family, REML, nAGQ, control, start, doFit,
     model, x, ...}{model specification arguments as in
-    \code{\link[lme4]{lmer}}; see there for details.}
+    \code{\link[lme4.0]{lmer}}; see there for details.}
   \item{subset, weights, na.action, offset, contrasts}{further model
     specification arguments as in \code{\link[stats]{lm}}; see there for
     details.}
 }
 \details{
   The bulk of the usage for \code{blmer} and \code{bglmer} closely
-  follows the functions \code{\link[lme4]{lmer}} and
-  \code{\link[lme4]{glmer}}. Those help pages provide a good overview of
+  follows the functions \code{\link[lme4.0]{lmer}} and
+  \code{\link[lme4.0]{glmer}}. Those help pages provide a good overview of
   fitting linear and generalized linear mixed models. The primary
   distinction is that \code{blmer} and \code{bglmer} allow the user to
   do Bayesian inference, with priors imposed on the different
@@ -257,7 +257,7 @@ bglmer(formula, data, family = gaussian, start = NULL,
       Must be positive semidefinite, or, for vector form, consistingly entirely of
       nonnegative numbers.
     \item \code{common.scale} - a boolean, as above.
-      Optimization in \code{\link[lme4]{lmer}} is done with all covariances
+      Optimization in \code{\link[lme4.0]{lmer}} is done with all covariances
       multiplied by a "common scale factor". When the \eqn{TRUE}, it is assumed that
       the specified covariance should also be multiplied by this factor, simplifying
       computation. \eqn{FALSE} permtis the specification of the covariance in an
@@ -296,7 +296,7 @@ The default is an improper inverse gamma distribution with both parameters as 0,
   are available.  See there for details.
 }
 \seealso{
-  \code{\link[lme4]{lmer}}, \code{\link[lme4]{glmer}},
+  \code{\link[lme4.0]{lmer}}, \code{\link[lme4.0]{glmer}},
   \code{\linkS4class{mer}} class, and \code{\link[stats]{lm}}.
 }
 \examples{

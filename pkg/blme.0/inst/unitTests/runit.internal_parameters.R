@@ -1,4 +1,4 @@
-cat("\n\nRUnit test cases for blme:::bmer_parametersTest function\n\n");
+cat("\n\nRUnit test cases for blme.0:::bmer_parametersTest function\n\n");
 
 test.blme.parameters.internals <- function()
 {

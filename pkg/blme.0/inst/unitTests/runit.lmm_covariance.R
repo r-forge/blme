@@ -1,4 +1,4 @@
-cat("\n\nRUnit test cases for bmer:::blmer function with priors on the covariance of the modeled coefficients.\n\n");
+cat("\n\nRUnit test cases for blme.0::blmer function with priors on the covariance of the modeled coefficients.\n\n");
 
 test.blme.blmer.covarPrior <- function()
 {
@@ -6,7 +6,7 @@ test.blme.blmer.covarPrior <- function()
   generateData <- FALSE;
   cacheOptimizations <- TRUE;
   
-  testRoot <- file.path(path.package(package="blme"), "unitTests");
+  testRoot <- file.path(path.package(package="blme.0"), "unitTests");
   
   source(file.path(testRoot, "lmmData.R"), TRUE);
   

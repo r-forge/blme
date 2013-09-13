@@ -455,10 +455,10 @@ famType <- function(family)
 {
     if (!(fTyp <- match(family$family, famNms, nomatch = 0)))
         stop(gettextf("unknown GLM family: %s",
-                      sQuote(family$family), domain = "R-lme4.0"))
+                      sQuote(family$family), domain = "R-lme4"))
     if (!(lTyp <- match(family$link, linkNms, nomatch = 0)))
         stop(gettextf("unknown link: %s",
-                      sQuote(family$link), domain = "R-lme4.0"))
+                      sQuote(family$link), domain = "R-lme4"))
     vNam <- switch(fTyp,
                    "mu(1-mu)",          # binomial
                    "constant",          # gaussian
@@ -470,7 +470,7 @@ famType <- function(family)
                    family$varfun)       # quasi
     if (!(vTyp <- match(vNam, varNms, nomatch = 0)))
         stop(gettextf("unknown GLM family: %s",
-                      sQuote(family$family), domain = "R-lme4.0"))
+                      sQuote(family$family), domain = "R-lme4"))
     c(fTyp = fTyp, lTyp = lTyp, vTyp = vTyp)
 }
 

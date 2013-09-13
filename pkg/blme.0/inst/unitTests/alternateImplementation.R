@@ -112,9 +112,9 @@ blme_computeDesignFactors <- function(model) {
   
   RZX <- as(solve(L, P %*% C %*% X.w, "L"), "matrix");
 
-  priorTypeNone     <- blme:::getEnumOrder(blme:::typeEnum, blme:::NONE_TYPE_NAME);
-  priorTypeDirect   <- blme:::getEnumOrder(blme:::typeEnum, blme:::DIRECT_TYPE_NAME);
-  priorFamilyNormal <- blme:::getEnumOrder(blme:::familyEnum, blme:::NORMAL_FAMILY_NAME);
+  priorTypeNone     <- blme.0:::getEnumOrder(blme.0:::typeEnum, blme.0:::NONE_TYPE_NAME);
+  priorTypeDirect   <- blme.0:::getEnumOrder(blme.0:::typeEnum, blme.0:::DIRECT_TYPE_NAME);
+  priorFamilyNormal <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::NORMAL_FAMILY_NAME);
 
   if (model@fixef.prior@type == priorTypeNone) {
     temp <- crossprod(X.w) - crossprod(RZX);
@@ -139,8 +139,8 @@ blme_computeDesignFactors <- function(model) {
                                ncol(model@X), ncol(model@X));
     }
 
-    onCommonScale <- blme:::getScaleInt(blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::defaultUnmodeledCoefficientPosteriorScale),
-                                        blme:::getEnumOrder(blme:::commonScaleEnum, blme:::COMMON_SCALE_TRUE_NAME));
+    onCommonScale <- blme.0:::getScaleInt(blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::defaultUnmodeledCoefficientPosteriorScale),
+                                        blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::COMMON_SCALE_TRUE_NAME));
     if (model@fixef.prior@scales[1] != onCommonScale)
       Sigma.beta.inv <- sigma.sq * Sigma.beta.inv;
     RX <- as(chol(RXPartial + Sigma.beta.inv), "matrix");

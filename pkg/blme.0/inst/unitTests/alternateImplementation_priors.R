@@ -85,20 +85,20 @@ blme_getPriorPenalty <- function(model) {
   commonScale <- ifelse(model@dims[["REML"]] == 1, model@deviance[["sigmaREML"]], model@deviance[["sigmaML"]])^2;
     
 
-  directType <- blme:::getEnumOrder(blme:::typeEnum, blme:::DIRECT_TYPE_NAME);
+  directType <- blme.0:::getEnumOrder(blme.0:::typeEnum, blme.0:::DIRECT_TYPE_NAME);
   
-  gammaFamily <- blme:::getEnumOrder(blme:::familyEnum, blme:::GAMMA_FAMILY_NAME);
-  invGammaFamily <- blme:::getEnumOrder(blme:::familyEnum, blme:::INVGAMMA_FAMILY_NAME);
-  wishartFamily    <- blme:::getEnumOrder(blme:::familyEnum, blme:::WISHART_FAMILY_NAME);
-  invWishartFamily <- blme:::getEnumOrder(blme:::familyEnum, blme:::INVWISHART_FAMILY_NAME);
-  normalFamily <- blme:::getEnumOrder(blme:::familyEnum, blme:::NORMAL_FAMILY_NAME);
+  gammaFamily <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::GAMMA_FAMILY_NAME);
+  invGammaFamily <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::INVGAMMA_FAMILY_NAME);
+  wishartFamily    <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::WISHART_FAMILY_NAME);
+  invWishartFamily <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::INVWISHART_FAMILY_NAME);
+  normalFamily <- blme.0:::getEnumOrder(blme.0:::familyEnum, blme.0:::NORMAL_FAMILY_NAME);
     
-  varOnCommonScale <- blme:::getScaleInt(blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::VAR_SCALE_NAME),
-                                         blme:::getEnumOrder(blme:::commonScaleEnum, blme:::COMMON_SCALE_TRUE_NAME));
-  sdOnCommonScale  <- blme:::getScaleInt(blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::SD_SCALE_NAME),
-                                         blme:::getEnumOrder(blme:::commonScaleEnum, blme:::COMMON_SCALE_TRUE_NAME));
-  varNotOnCommonScale <- blme:::getScaleInt(blme:::getEnumOrder(blme:::posteriorScaleEnum, blme:::VAR_SCALE_NAME),
-                                            blme:::getEnumOrder(blme:::commonScaleEnum, blme:::COMMON_SCALE_FALSE_NAME));
+  varOnCommonScale <- blme.0:::getScaleInt(blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::VAR_SCALE_NAME),
+                                         blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::COMMON_SCALE_TRUE_NAME));
+  sdOnCommonScale  <- blme.0:::getScaleInt(blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::SD_SCALE_NAME),
+                                         blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::COMMON_SCALE_TRUE_NAME));
+  varNotOnCommonScale <- blme.0:::getScaleInt(blme.0:::getEnumOrder(blme.0:::posteriorScaleEnum, blme.0:::VAR_SCALE_NAME),
+                                            blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::COMMON_SCALE_FALSE_NAME));
 
 
   if (model@var.prior@type  == directType) {
