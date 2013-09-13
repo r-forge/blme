@@ -6,7 +6,7 @@ test.bmer.blmer.varPrior <- function()
   generateData <- FALSE;
   cacheOptimizations <- TRUE;
   
-  testRoot <- file.path(.path.package(package="blme"), "unitTests");
+  testRoot <- file.path(path.package(package="blme"), "unitTests");
   
   # need this to convert st matrices in lmer fit to a vector
   # for comparison against an optim call

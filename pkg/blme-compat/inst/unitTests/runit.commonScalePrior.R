@@ -4,7 +4,7 @@ test.blme.parsePrior.var.prior <- function()
 {
   generateData <- FALSE;
   
-  testRoot <- file.path(.path.package(package="blme"), "unitTests");
+  testRoot <- file.path(path.package(package="blme"), "unitTests");
   source(file.path(testRoot, "lmmData.R"), TRUE);
 
   options(warn = -1);

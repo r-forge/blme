@@ -18,7 +18,6 @@ if (generateData) {
      x.1 * (beta[2] + theta.1[g.1,2] + theta.2[g.2,2]) +
      x.2 * (beta[3] + theta.2[g.2,3]) +
      rnorm(N);
-  }
 
   # ignored but still here
   weights <- runif(N);

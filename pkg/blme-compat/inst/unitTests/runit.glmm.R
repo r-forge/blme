@@ -7,7 +7,7 @@ test.blme.bglmer <- function()
 {
   generateData <- FALSE;
   
-  testRoot <- file.path(.path.package(package="blme"), "unitTests");
+  testRoot <- file.path(path.package(package="blme"), "unitTests");
   source(file.path(testRoot, "glmmData.R"), TRUE);
   source(file.path(testRoot, "checkWarning.R"), TRUE);
 

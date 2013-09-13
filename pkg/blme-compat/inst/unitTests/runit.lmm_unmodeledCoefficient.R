@@ -6,7 +6,7 @@ test.bmer.blmer.fixefPrior <- function()
   generateData <- FALSE;
   cacheOptimizations <- TRUE;
   
-  testRoot <- file.path(.path.package(package="blme"), "unitTests");
+  testRoot <- file.path(path.package(package="blme"), "unitTests");
   
   source(file.path(testRoot, "lmmData.R"), TRUE);
   

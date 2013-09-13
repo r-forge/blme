@@ -6,7 +6,7 @@ test.blme.blmer.covarPrior <- function()
   generateData <- FALSE;
   cacheOptimizations <- TRUE;
   
-  testRoot <- file.path(.path.package(package="blme"), "unitTests");
+  testRoot <- file.path(path.package(package="blme"), "unitTests");
   
   source(file.path(testRoot, "lmmData.R"), TRUE);
   
@@ -73,7 +73,7 @@ test.blme.blmer.covarPrior <- function()
                           lower=lowerBounds, upper=upperBounds,
                           method="L-BFGS-B", model = testModel, control=list(factr=1e-10));
   } else {
-    optimResults <- list(par = c(0.617248561865064));
+    optimResults <- list(par = c(0.700221954013278));
   }
   
   blmerFit <- blmer(y ~ x.1 + x.2 + (1 | g.1),
@@ -124,7 +124,7 @@ test.blme.blmer.covarPrior <- function()
                           lower=lowerBounds, upper=upperBounds,
                           method="L-BFGS-B", model = testModel, control=list(factr=1e-10));
   } else {
-    optimResults <- list(par = c(0.826102911329016, 1.46347018293258, -0.0698662045097548));
+    optimResults <- list(par = c(0.917345114641536, 1.55424200990301, -0.0552072823432362));
   }
   
   blmerFit <- blmer(y ~ x.1 + x.2 + (1 + x.1 | g.1),
@@ -248,7 +248,7 @@ test.blme.blmer.covarPrior <- function()
                           lower=lowerBounds, upper=upperBounds,
                           method="L-BFGS-B", model = testModel, control=list(factr=1e-10));
   } else {
-    optimResults <- list(par = c(0.409482705974117, 2.09078910076072));
+    optimResults <- list(par = c(0.454527750086968, 2.08369986885799));
   }
 
   blmerFit <- blmer(y ~ x.1 + x.2 + (1 | g.1),
@@ -273,7 +273,7 @@ test.blme.blmer.covarPrior <- function()
                           lower=lowerBounds, upper=upperBounds,
                           method="L-BFGS-B", model = testModel, control=list(factr=1e-10));
   } else {
-    optimResults <- list(par = c(0.792440504958109, 1.37292598078286, -0.0685088488977944, 1.26420602775867));
+    optimResults <- list(par = c(0.865889721210982, 1.43701210608914, -0.0543149165896125, 1.26345917179232));
   }
   
   blmerFit <- blmer(y ~ x.1 + x.2 + (1 + x.1 | g.1),
