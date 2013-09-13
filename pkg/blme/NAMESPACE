@@ -1,11 +1,12 @@
-export(blmer)
-export(bglmer)
+export(blmer, bglmer)
 
+exportClasses(bmerMod)
 exportClasses(blmerMod)
 exportClasses(bglmerMod)
-exportClasses(bmerMod)
 
 importClassesFrom(lme4, merMod, lmerMod, glmerMod)
+
+importFrom(methods, show)
 
 S3method(print, bmerMod)
 S3method(print, summary.bmerMod)

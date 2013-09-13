@@ -204,7 +204,7 @@ optimizeLmer <- function(devfun,
 
     startingValues <- foldPars(start);
     lowerBounds <- foldLowers(start);
-    opt <- lme4:::optwrap(optimizer,
+    opt <- get("optwrap", asNamespace("lme4"))(optimizer,
                           devfun,
                           startingValues,
                           lower = lowerBounds,
@@ -235,7 +235,7 @@ optimizeLmer <- function(devfun,
             ## FIXME: allow user to specify ALWAYS restart if on boundary?
             if (any(bgrad<0)) {
                 if (verbose) message("some theta parameters on the boundary, restarting")
-                opt <- lme4:::optwrap(optimizer,
+                opt <- get("optwrap", asNamespace("lme4"))(optimizer,
                                       devfun,
                                       opt$par,
                                       lower=lowerBounds, control=control,

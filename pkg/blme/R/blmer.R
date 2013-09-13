@@ -143,7 +143,7 @@ bglmer <- function(formula, data=NULL, family = gaussian,
   
   if(nAGQ > 0L) {
     
-    start <- lme4:::updateStart(start,theta=opt$par)
+    start <- get("updateStart", asNamespace("lme4"))(start,theta=opt$par)
     
     ## update deviance function to include fixed effects as inputs
     devfun <- updateBglmerDevfun(devfun, glmod$reTrms, nAGQ = nAGQ)
