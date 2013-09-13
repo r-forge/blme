@@ -146,7 +146,7 @@ lmerFrames <- function(mc, formula, contrasts, vnms = character(0))
 
     ## The model formula for the fixed-effects terms only.
     fixed.form <- nobars(formula)       # remove any terms with `|'
-    if (inherits(fixed.form, "formula"))
+    if (!inherits(fixed.form, "formula"))
       # RHS is empty - use `y ~ 1'
       fixed.form <- as.formula(substitute(foo ~ 1, list(foo = fixed.form)))
 
@@ -455,10 +455,10 @@ famType <- function(family)
 {
     if (!(fTyp <- match(family$family, famNms, nomatch = 0)))
         stop(gettextf("unknown GLM family: %s",
-                      sQuote(family$family), domain = "R-lme4"))
+                      sQuote(family$family), domain = "R-lme4.0"))
     if (!(lTyp <- match(family$link, linkNms, nomatch = 0)))
         stop(gettextf("unknown link: %s",
-                      sQuote(family$link), domain = "R-lme4"))
+                      sQuote(family$link), domain = "R-lme4.0"))
     vNam <- switch(fTyp,
                    "mu(1-mu)",          # binomial
                    "constant",          # gaussian
@@ -470,7 +470,7 @@ famType <- function(family)
                    family$varfun)       # quasi
     if (!(vTyp <- match(vNam, varNms, nomatch = 0)))
         stop(gettextf("unknown GLM family: %s",
-                      sQuote(family$family), domain = "R-lme4"))
+                      sQuote(family$family), domain = "R-lme4.0"))
     c(fTyp = fTyp, lTyp = lTyp, vTyp = vTyp)
 }
 

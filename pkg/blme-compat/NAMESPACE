@@ -1,0 +1,11 @@
+useDynLib(blme, .registration=TRUE)
+
+import("Matrix")
+
+export(blmer, bglmer)
+
+exportClasses(bmer, summary.bmer)
+
+importClassesFrom("lme4", mer, summary.mer)
+
+exportMethods(summary, print, show)

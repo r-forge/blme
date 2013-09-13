@@ -82,7 +82,7 @@ lme4_R_cholmod_error(int status, const char *file, int line, const char *message
 #ifdef HAVE_VISIBILITY_ATTRIBUTE
 __attribute__ ((visibility ("default")))
 #endif
-void R_init_blme(DllInfo *dll)
+void R_init_blme_0(DllInfo *dll)
 {
     R_registerRoutines(dll, NULL, CallEntries, NULL, NULL);
     R_useDynamicSymbols(dll, FALSE);
@@ -144,6 +144,6 @@ void R_init_blme(DllInfo *dll)
 /** Finalizer for blmer called upon unloading the package.
  *
  */
-void R_unload_blmer(DllInfo *dll){
+void R_unload_blme_0(DllInfo *dll){
     M_cholmod_finish(&cholmodCommon);
 }

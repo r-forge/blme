@@ -14,12 +14,10 @@ if (generateData) {
   g.1 <- sapply(1:N, function(i) which(g.1[,i] == 1));
   g.2 <- sapply(1:N, function(i) which(g.2[,i] == 1));
 
-  y <- rep(0, N);
-  for (i in 1:N) {
-    y[i] <- 1 * (beta[1] + theta.1[g.1[i], 1] + theta.2[g.2[i], 1]) +
-       x.1[i] * (beta[2] + theta.1[g.1[i], 2] + theta.2[g.2[i], 2]) +
-       x.2[i] * (beta[3] +                      theta.2[g.2[i], 3]) +
-       rnorm(1);
+  y <- 1 * (beta[1] + theta.1[g.1,1] + theta.2[g.2,1]) +
+     x.1 * (beta[2] + theta.1[g.1,2] + theta.2[g.2,2]) +
+     x.2 * (beta[3] + theta.2[g.2,3]) +
+     rnorm(N);
   }
 
   # ignored but still here

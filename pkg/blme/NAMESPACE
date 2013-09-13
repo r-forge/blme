@@ -1,11 +1,21 @@
-useDynLib(blme, .registration=TRUE)
+export(blmer)
+export(bglmer)
 
-import("Matrix")
+exportClasses(blmerMod)
+exportClasses(bglmerMod)
+exportClasses(bmerMod)
 
-export(blmer, bglmer)
+importClassesFrom(lme4, merMod, lmerMod, glmerMod)
 
-exportClasses(bmer, summary.bmer)
+S3method(print, bmerMod)
+S3method(print, summary.bmerMod)
+S3method(summary, bmerMod)
+S3method(summary, summary.bmerMod)
+S3method(vcov, summary.bmerMod)
 
-importClassesFrom("lme4", mer, summary.mer)
-
-exportMethods(summary, print, show)
+S3method(toString, bmerNormalDist)
+S3method(toString, bmerPointDist)
+S3method(toString, bmerWishartDist)
+S3method(toString, bmerInvWishartDist)
+S3method(toString, bmerGammaDist)
+S3method(toString, bmerInvGammaDist)
