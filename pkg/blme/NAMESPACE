@@ -1,12 +1,6 @@
 export(blmer, bglmer)
 
-exportClasses(bmerMod)
-exportClasses(blmerMod)
-exportClasses(bglmerMod)
-
-importClassesFrom(lme4, merMod, lmerMod, glmerMod)
-
-importFrom(methods, show)
+exportClasses(bmerMod, blmerMod, bglmerMod)
 
 S3method(print, bmerMod)
 S3method(print, summary.bmerMod)
@@ -20,3 +14,16 @@ S3method(toString, bmerWishartDist)
 S3method(toString, bmerInvWishartDist)
 S3method(toString, bmerGammaDist)
 S3method(toString, bmerInvGammaDist)
+
+importFrom(methods, show)
+importFrom(stats, gaussian)
+importFrom(stats,vcov)
+importFrom(utils, getS3method)
+
+importClassesFrom(lme4, merMod, lmerMod, glmerMod)
+importFrom(lme4, lmer, glmer)
+importFrom(lme4, lFormula, glFormula)
+importFrom(lme4, lmerControl, glmerControl)
+importFrom(lme4, mkMerMod)
+importFrom(lme4, optimizeGlmer)
+importFrom(lme4, mkLmerDevfun, mkGlmerDevfun, updateGlmerDevfun)
