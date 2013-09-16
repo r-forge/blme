@@ -19,7 +19,7 @@ Versioning
 ==========
 The main branch of blme will go forward and depend on lme4 version 1.0. A legacy branch will also be provided on R-forge that is compatible with "lme4.0", called blme.0. This info applies until lme4 version 1.0 makes its way to CRAN, at which point using the latest versions should be hassle-free.
 
-Finally, a compatibility build is available until the CRAN situation has been resolved. It is named "blme" and depends on lme4 for verions less than 1.
+Finally, a legacy build is available until the CRAN situation has been resolved. It is named "blme" and depends on lme4 for versions less than 1.
 
 Installation
 ============
@@ -41,8 +41,10 @@ To install legacy versions
     2.1) Within R, execute
       install.packages("blme.0", repos = "http://R-Forge.R-project.org", type = "source")
 
-To install the compatibility package
+To install the legacy package
   1) Install lme4 version, less than 1 (on CRAN)
-  2) Install blme-compat
-    2.1) Within R, execute
-      install.packages("blme-compat", repos = "http://R-Forge.R-project.org", type = "source")
+  2) Install blme legacy
+    2.1) Checkout blme legacy source by executing from a command line:
+      svn co svn://svn.R-Forge.R-project.org/svnroot/blme/legacy/blme
+    2.2) Within R, execute
+      install.packages("path/to/blme", repos = NULL, type = "source")

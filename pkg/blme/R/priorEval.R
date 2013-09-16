@@ -30,7 +30,7 @@ evaluateCovPriors <- function(covPriors, factorColumnNames, evalEnv) {
     covPriors <- parse(text = covPriors)[[1]];
   }
 
-  if (is.call(covPriors) && covPriors[[1]] == "list") covPriors <- eval(covPriors);
+  if (is.call(covPriors) && covPriors[[1]] == "list") covPriors[[1]] <- NULL;
   
   if (!is.list(covPriors)) covPriors <- list(covPriors);
 
@@ -43,7 +43,6 @@ evaluateCovPriors <- function(covPriors, factorColumnNames, evalEnv) {
       covPriors[[i]] <- covPrior.i;
     }
   }
-  
   for (i in 1:length(covPriors)) {
     covPrior.i <- covPriors[[i]];
     if (is.character(covPrior.i)) {
@@ -51,7 +50,7 @@ evaluateCovPriors <- function(covPriors, factorColumnNames, evalEnv) {
       covPrior.i <- gsub("inverse.gamma", "invgamma", covPrior.i);
       covPrior.i <- parse(text = covPrior.i)[[1]];
     }
-    
+
     ## turn 'wishart' into 'wishart()'
     if (is.symbol(covPrior.i)) covPrior.i <- call(as.character(covPrior.i));
     

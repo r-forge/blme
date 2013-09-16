@@ -13,7 +13,7 @@ setClass("bmerInvWishartDist", contains = "bmerDist",
          validity = function(object) object@posteriorScale == "cov" || object@posteriorScale == "sqrt");
 
 toString.bmerWishartDist <- function(x, digits = getOption("digits"), ...) {
-  if (any(x@R.scale.inv == 0)) {
+  if (any(diag(x@R.scale.inv) == 0)) {
     scale <- Inf;
   } else if (any(is.infinite(x@R.scale.inv))) {
     scale <- 0;
@@ -24,9 +24,9 @@ toString.bmerWishartDist <- function(x, digits = getOption("digits"), ...) {
   if (length(scale) == 1) {
     scaleString <- round(scale, digits);
   } else if (nrow(scale) > 2) {
-    scaleString <- paste("c(", round(scale[1:3], digits), ", ...)", sep = "");
+    scaleString <- paste("c(", toString(round(scale[1:3], digits)), ", ...)", sep = "");
   } else if (nrow(scale) == 2) {
-    scaleString <- paste("c(", round(scale[1:4], digits), ")", sep = "");
+    scaleString <- paste("c(", toString(round(scale[1:4], digits)), ")", sep = "");
   }
   
   paste("wishart(",
@@ -38,7 +38,7 @@ toString.bmerWishartDist <- function(x, digits = getOption("digits"), ...) {
 }
 
 toString.bmerInvWishartDist <- function(x, digits = getOption("digits"), ...) {
-  if (any(x@R.scale == 0)) {
+  if (any(diag(x@R.scale) == 0)) {
     scale <- 0;
   } else if (any(is.infinite(x@R.scale))) {
     scale <- Inf;
@@ -49,9 +49,9 @@ toString.bmerInvWishartDist <- function(x, digits = getOption("digits"), ...) {
   if (length(scale) == 1) {
     scaleString <- round(scale, digits);
   } else if (nrow(scale) > 2) {
-    scaleString <- paste("c(", round(scale[1:3], digits), ", ...)", sep = "");
+    scaleString <- paste("c(", toString(round(scale[1:3], digits)), ", ...)", sep = "");
   } else if (nrow(scale) == 2) {
-    scaleString <- paste("c(", round(scale[1:4], digits), ")", sep = "");
+    scaleString <- paste("c(", toString(round(scale[1:4], digits)), ")", sep = "");
   }
   
   paste("invwishart(",

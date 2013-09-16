@@ -81,7 +81,7 @@ lmmDistributions <- list(
 
     return(new("bmerGammaDist", commonScale = common.scale, shape = shape, rate = rate, posteriorScale = posterior.scale));
   },
-  invgamma = function(shape = 0.5, scale = 10^2, common.scale = TRUE, posterior.scale = "sd") {
+  invgamma = function(shape = 0.001, scale = shape + 0.05, common.scale = TRUE, posterior.scale = "var") {
     matchedCall <- match.call();
     if (!is.null(matchedCall$shape)) shape <- eval(matchedCall$shape);
     if (!is.null(matchedCall$scale)) scale <- eval(matchedCall$scale);
@@ -102,7 +102,7 @@ lmmDistributions <- list(
     if (!is.null(matchedCall$df)) df <- eval(matchedCall$df);
     if (!is.null(matchedCall$scale)) scale <- eval(matchedCall$scale);
     common.scale <- blme:::deparseCommonScale(common.scale);
-
+    
     if (df <= level.dim - 1)
       stop("wishart dists for degrees of freedom less than or equal to (level.dim - 1) are singular or non-existent");
     
@@ -112,7 +112,7 @@ lmmDistributions <- list(
         R.scale.inv <- diag(0, level.dim);
         log.det.scale <- Inf;
       } else {
-        R.scale.inv <- diag(1 / sqrt(scale), level.dim);
+        R.scale.inv <- diag(1 / sqrt(scale[1]), level.dim);
       }
     } else if (length(scale) == level.dim) {
       R.scale.inv <- diag(1 / sqrt(scale), level.dim);
@@ -138,7 +138,7 @@ lmmDistributions <- list(
                log.det.scale = log.det.scale,
                posteriorScale = posterior.scale));
   },
-  invwishart = function(df = level.dim - 0.5, scale = diag(10^2 / (df + level.dim + 1), level.dim),
+  invwishart = function(df = level.dim - 0.998, scale = diag(df + 0.1, level.dim),
                         common.scale = TRUE, posterior.scale = "cov") {
     matchedCall <- match.call();
     if (!is.null(matchedCall$df)) df <- eval(matchedCall$df);
@@ -154,7 +154,7 @@ lmmDistributions <- list(
         R.scale <- diag(0, level.dim);
         log.det.scale <- -Inf;
       } else {
-        R.scale <- diag(sqrt(scale), level.dim);
+        R.scale <- diag(sqrt(scale[1]), level.dim);
       }
     } else if (length(scale) == level.dim) {
       R.scale <- diag(sqrt(scale), level.dim);

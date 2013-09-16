@@ -10,11 +10,13 @@ toString.bmerNormalDist <- function(x, digits = getOption("digits"), ...) {
   corrs <- round(corrs[lower.tri(corrs)], digits);
   
   if (nrow(cov) > 2) {
-    covString <- paste("sd = c(", sds[1:2], ", ...), corr = c(", corrs[1], " ...)", sep = "");
-  } else if (nrow(cov) == 1) {
-    covString <- paste("sd = c(", sds[1:2], "), corr = ", corrs[1], sep = "");
+    covString <- paste("sd = c(", toString(round(sds[1:2], digits)),
+                       ", ...), corr = c(", toString(round(corrs[1], digits)), " ...)", sep = "");
+  } else if (nrow(cov) == 2) {
+    covString <- paste("sd = c(", toString(round(sds[1:2], digits)),
+                       "), corr = ", toString(round(corrs[1], digits)), sep = "");
   } else {
-    covString <- paste("sd = ", sds[1], sep = "");
+    covString <- paste("sd = ", toString(round(sds[1], digits)), sep = "");
   }
   
   paste("normal(", covString,

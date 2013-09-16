@@ -75,6 +75,8 @@ blmer <- function(formula, data = NULL, REML = TRUE,
   result <- mkMerMod(devFunEnv, opt, lmod$reTrms, fr = lmod$fr, mcout) ## prepare output
   
   result <- repackageMerMod(result, opt, devFunEnv);
+
+  return(result);
 }
 
 bglmer <- function(formula, data=NULL, family = gaussian,
