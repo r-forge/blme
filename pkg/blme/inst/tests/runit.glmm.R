@@ -30,4 +30,5 @@ test.blme.bglmer <- function()
   options("RUnit" = RUnitOptions);
   
   checkException(blme:::parsePrior(bglmerFit, fixef.prior = normal(common.scale = TRUE)));
+  checkException(blme:::parsePrior(bglmerFit, fixef.prior = t(common.scale = TRUE)));
 }

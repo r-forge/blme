@@ -1,3 +1,4 @@
+if (FALSE) {
 foldPars <- function(pars) {
   if (is.numeric(pars)) return(pars);
   as.numeric(unlist(pars));
@@ -180,6 +181,7 @@ setLower <- function(pars, lowers) {
   return(pars);
 }
 
+}
 ##' @rdname modular
 ##' @inheritParams lmer
 ##' @inheritParams lmerControl
@@ -189,59 +191,73 @@ setLower <- function(pars, lowers) {
 ##' \cr
 ##' @export
 optimizeLmer <- function(devfun,
-                         optimizer="Nelder_Mead",
-                         restart_edge=FALSE,
-                         start = NULL,
+                         optimizer    = formals(lmerControl)$optimizer,
+                         restart_edge = formals(lmerControl)$restart_edge,
+##                         boundary.tol = formals(lmerControl)$boundary.tol,
+                         start   = NULL,
                          verbose = 0L,
-                         control = list()) {
-    verbose <- as.integer(verbose)
-    rho <- environment(devfun)
+                         control = list()) { ##,
+##                         ...) {
+  verbose <- as.integer(verbose)
+  rho <- environment(devfun)
 
-    if (is.null(start)) {
-      start <- getStart(start, rho);
-      start <- setLowerBounds(start, rho);
+  lme4Env <- asNamespace("lme4");
+
+  parInfo <- rho$parInfo;
+  startingValues <- getStartingValues(start, rho, parInfo);
+  lowerBounds <- getLowerBounds(parInfo);
+  
+  ## if (is.null(start)) {
+  ##  start <- getStart(start, rho);
+  ##  start <- setLowerBounds(start, rho);
+  ##}
+  ##startingValues <- foldPars(start);
+  ##lowerBounds <- foldLowers(start);
+  
+  optwrap <- get("optwrap", lme4Env);
+  
+  opt <- optwrap(optimizer,
+                 devfun,
+                 startingValues,
+                 lower = lowerBounds,
+                 control=control,
+                 adj=FALSE, verbose=verbose);
+  
+  if (restart_edge) {
+    ## FIXME: should we be looking at rho$pp$theta or opt$par
+    ##  at this point???  in koller example (for getData(13)) we have
+    ##   rho$pp$theta=0, opt$par=0.08
+    if (length(bvals <- which(rho$pp$theta==rho$lower))>0) {
+      par <- opt$par;
+      ## *don't* use numDeriv -- cruder but fewer dependencies, no worries
+      ##  about keeping to the interior of the allowed space
+      theta0 <- new("numeric",rho$pp$theta) ## 'deep' copy ...
+      d0 <- devfun(par)
+      btol <- 1e-5  ## FIXME: make user-settable?
+      bgrad <- sapply(bvals,
+                      function(i) {
+                        bndval <- rho$lower[i]
+                        par[1:length(theta0)] <- theta0;
+                        par[i] <- bndval+btol
+                        (devfun(par)-d0)/btol
+                      })
+      ## what do I need to do to reset rho$pp$theta to original value???
+      par[1:length(theta0)] <- theta0;
+      devfun(par) ## reset rho$pp$theta after tests
+      ## FIXME: allow user to specify ALWAYS restart if on boundary?
+      if (any(bgrad<0)) {
+        if (verbose) message("some theta parameters on the boundary, restarting")
+        opt <- optwrap(optimizer,
+                       devfun,
+                       opt$par,
+                       lower=lowerBounds, control=control,
+                       adj=FALSE, verbose=verbose);
+      }
     }
-
-    startingValues <- foldPars(start);
-    lowerBounds <- foldLowers(start);
-    opt <- get("optwrap", asNamespace("lme4"))(optimizer,
-                          devfun,
-                          startingValues,
-                          lower = lowerBounds,
-                          control=control,
-                          adj=FALSE, verbose=verbose)
-
-    if (restart_edge) {
-        ## FIXME: should we be looking at rho$pp$theta or opt$par
-        ##  at this point???  in koller example (for getData(13)) we have
-        ##   rho$pp$theta=0, opt$par=0.08
-        if (length(bvals <- which(rho$pp$theta==rho$lower))>0) {
-            par <- opt$par;
-            ## *don't* use numDeriv -- cruder but fewer dependencies, no worries
-            ##  about keeping to the interior of the allowed space
-            theta0 <- new("numeric",rho$pp$theta) ## 'deep' copy ...
-            d0 <- devfun(par)
-            btol <- 1e-5  ## FIXME: make user-settable?
-            bgrad <- sapply(bvals,
-                            function(i) {
-                                bndval <- rho$lower[i]
-                                par[1:length(theta0)] <- theta0;
-                                par[i] <- bndval+btol
-                                (devfun(par)-d0)/btol
-                            })
-            ## what do I need to do to reset rho$pp$theta to original value???
-            par[1:length(theta0)] <- theta0;
-            devfun(par) ## reset rho$pp$theta after tests
-            ## FIXME: allow user to specify ALWAYS restart if on boundary?
-            if (any(bgrad<0)) {
-                if (verbose) message("some theta parameters on the boundary, restarting")
-                opt <- get("optwrap", asNamespace("lme4"))(optimizer,
-                                      devfun,
-                                      opt$par,
-                                      lower=lowerBounds, control=control,
-                                      adj=FALSE, verbose=verbose)
-            }
-        }
-    }
-    return(opt)
+  }
+##  if (!is.null(boundary.tol) && boundary.tol > 0) {
+##    if (exists("check.boundary", lme4Env))
+##      opt <- get("check.boundary", lme4Env)(rho, opt, devfun, boundary.tol);
+##  }
+  return(opt)
 }

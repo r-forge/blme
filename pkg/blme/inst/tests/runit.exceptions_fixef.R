@@ -20,4 +20,6 @@ test.blme.parsePrior.cov.prior.exceptions <- function()
   checkException(parsePrior(fit, fixef.prior = "normal(cov = negDefiniteMatrix)"));
   asymmetricMatrix <- matrix(c(1, 0.5, 0.3, 0.7), 2, 2);
   checkException(parsePrior(fit, fixef.prior = "normal(cov = asymmetricMatrix)"));
+
+  checkException(parsePrior(fit, fixef.prior = "t"))
 }
