@@ -43,6 +43,14 @@ blmer <- function(formula, data = NULL, REML = TRUE,
     control$checkControl$check.nobs.vs.rankZ <- "ignore";
     control$checkControl$check.nobs.vs.nRE <- "ignore";
   }
+
+  hasPseudoData <-
+    !is.null(fixef.prior) && (grepl("^\\W*normal", fixef.prior) || (is.call(fixef.prior) && fixef.prior[[1]] == "normal"));
+
+  if (hasPseudoData) {
+    control$checkControl$check.rankX <- "ignore";
+  }
+  
   mc$control <- control ## update for  back-compatibility kluge
   
   ## https://github.com/lme4/lme4/issues/50

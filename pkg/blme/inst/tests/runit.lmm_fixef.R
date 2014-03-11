@@ -14,7 +14,7 @@ test.blme.blmer.fixefPrior <- function()
   
   fit <- blmer(y ~ x.1 + x.2 + (1 + x.1 | g.1) + (1 + x.1 + x.2 | g.2), testData, control = control,
                     cov.prior = NULL, fixef.prior = fixef.prior, start = startingValues);
-  checkEquals(fit@theta, result);
+  checkEquals(fit@theta, result, tolerance = 5.0e-5);
 
 
   fixef.prior <- "normal(sd = 10, common.scale = FALSE)";
@@ -24,8 +24,8 @@ test.blme.blmer.fixefPrior <- function()
   
   fit <- blmer(y ~ x.1 + x.2 + (1 + x.1 | g.1) + (1 + x.1 + x.2 | g.2), testData, control = control,
                     cov.prior = NULL, fixef.prior = fixef.prior, start = startingValues);
-  checkEquals(fit@theta, result);
-  checkEquals(fit@devcomp$cmp[["sigmaREML"]], if (lme4IsOld) 0.969074276597577 else 0.969074276597577);
+  checkEquals(fit@theta, result, tolerance = 5.0e-5);
+  checkEquals(fit@devcomp$cmp[["sigmaREML"]], if (lme4IsOld) 0.969074276597577 else 0.969074276597577, tolerance = 1.0e-6);
   
   
   fixef.prior <- "t(3, c(10^2, 2.5^2), common.scale = FALSE)";
@@ -36,8 +36,8 @@ test.blme.blmer.fixefPrior <- function()
   
   fit <- blmer(y ~ x.1 + x.2 + (1 + x.1 | g.1) + (1 + x.1 + x.2 | g.2), testData, REML = FALSE, control = control,
                     cov.prior = NULL, fixef.prior = fixef.prior, start = startingValues);
-  checkEquals(fit@theta, result);
-  checkEquals(fit@beta, fixefResult);
+  checkEquals(fit@theta, result, tolerance = 5.0e-5);
+  checkEquals(fit@beta, fixefResult, tolerance = 5.0e-5);
   
   # check even that these run without error
   options(warn = 2);
