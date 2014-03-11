@@ -65,35 +65,19 @@ lmmDistributions <- list(
     
     return(new("bmerNormalDist", commonScale = common.scale, R.cov.inv = solve(chol(cov))));
   },
-  t = function(df = 5, sd = c(10, 2.5), scale, common.scale = TRUE) {
+  t = function(df = 3, scale = c(10^2, 2.5^2), common.scale = TRUE) {
     matchedCall <- match.call();
     if (!is.null(matchedCall$df)) df <- eval(matchedCall$df);
-    if (!is.null(matchedCall$sd)) sd <- eval(matchedCall$sd);
     if (!is.null(matchedCall$scale)) scale <- eval(matchedCall$scale);
-    if (!is.null(matchedCall$sd) && !is.null(matchedCall$scale))
-      warning("both sd and scale supplied to t, only scale will be used");
     common.scale <- blme:::deparseCommonScale(common.scale);
 
     if (df <= 0) stop("t prior requires positive degrees of freedom")
 
-    if (missing(scale) && !is.null(sd)) {
-      if (df <= 2) stop("t prior specified by sd, but second moment only exists if df > 2");
-      
-      sd <- sd^2;
-      if (length(sd) == 1) {
-        cov <- diag(sd, p);
-      } else if (length(sd) == 2) {
-        cov <- diag(sd[c(1, rep(2, p - 1))], p);
-      } else {
-        sd <- rep(sd, p %/% length(sd) + 1)[1:p];
-        cov <- diag(sd, p);
-      }
-      scale <- cov * (df - 2) / df;
-    }
-    if (missing(scale) || is.null(scale)) {
-      stop("t prior requires either sd or scale to be specified");
-    }
-    if (length(scale) == p) {
+    if (length(scale) == 1) {
+      scale <- diag(scale, p);
+    } else if (length(scale) == 2) {
+      scale <- diag(scale[c(1, rep(2, p - 1))], p);
+    } else if (length(scale) == p) {
       scale <- diag(scale, p);
     } else if (length(scale) != p^2) {
       stop("t prior scale of improper length");
@@ -235,7 +219,7 @@ lmmDistributions <- list(
     
     return(new("bmerPointDist", commonScale = FALSE, value = value));
   },
-  custom = function(fn, chol = FALSE, scale = "none", common.scale = TRUE) {
+  custom = function(fn, chol = FALSE, common.scale = TRUE, scale = "none") {
     matchedCall <- match.call();
     
     if (!is.null(matchedCall$chol)) chol <- eval(matchedCall$chol);
@@ -265,21 +249,15 @@ glmmDistributions <- list(
 
     return(normal(sd = sd, common.scale = FALSE));
   },
-  t = function(df = 5, sd = c(10, 2.5), scale) {
+  t = function(df = 5, scale = c(10^2, 2.5^2)) {
     t <- blme:::lmmDistributions$t;
     environment(t) <- environment();
         
     matchedCall <- match.call();
     if (!is.null(matchedCall$df)) df <- eval(matchedCall$df);
-    if (!is.null(matchedCall$sd) && !is.null(matchedCall$scale))
-      warning("both sd and scale supplied to t, only scale will be used");
-    if (!is.null(matchedCall$scale)) {
-      scale <- eval(matchedCall$scale);
-      return(t(df = df, scale = scale, common.scale = FALSE));
-    }
-    if (!is.null(matchedCall$sd)) sd <- eval(matchedCall$sd);
-
-    return(t(df = df, sd = sd, common.scale = FALSE));
+    if (!is.null(matchedCall$scale)) scale <- eval(matchedCall$scale);
+    
+    t(df = df, scale = scale, common.scale = FALSE);
   },
   gamma = function(shape = 2.5, rate = 0, posterior.scale = "sd") {
     gamma <- blme:::lmmDistributions$gamma;

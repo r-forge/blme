@@ -6,32 +6,15 @@ setClass("bmerTDist",
 toString.bmerTDist <- function(x, digits = getOption("digits"), ...) {
   scaleString <- "";
   scale <- crossprod(solve(x@R.scale.inv))
-  if (x@df > 2) {
-    cov <- scale * x@df / (x@df - 2);
-    sds <- sqrt(diag(cov));
-    corrs <- diag(1 / sds) %*% cov %*% diag(1 / sds);
-    
-    sds <- round(sds, digits);
-    corrs <- round(corrs[lower.tri(corrs)], digits);
-    
-    if (nrow(cov) > 2) {
-      scaleString <- paste("sd = c(", toString(round(sds[1:2], digits)),
-                           ", ...), corr = c(", toString(round(corrs[1], digits)), " ...)", sep = "");
-    } else if (nrow(cov) == 2) {
-      scaleString <- paste("sd = c(", toString(round(sds[1:2], digits)),
-                         "), corr = ", toString(round(corrs[1], digits)), sep = "");
-    } else {
-      scaleString <- paste("sd = ", toString(round(sds[1], digits)), sep = "");
-    }
+  
+  if (nrow(scale) > 2) {
+    scaleString <- paste("scale = c(", toString(round(scale[1:4], digits)), ", ...)", sep = "");
+  } else if (nrow(cov) == 2) {
+    scaleString <- paste("scale = c(", toString(round(scale[1:4], digits)), ")", sep = "");
   } else {
-    if (nrow(scale) > 2) {
-      scaleString <- paste("scale = c(", toString(round(scale[1:4], digits)), ", ...)", sep = "");
-    } else if (nrow(cov) == 2) {
-      scaleString <- paste("scale = c(", toString(round(scale[1:4], digits)), ")", sep = "");
-    } else {
-      scaleString <- paste("scale = ", toString(round(scale[1], digits)), sep = "");
-    }
+    scaleString <- paste("scale = ", toString(round(scale[1], digits)), sep = "");
   }
+  
   paste("t(df = ", x@df, ", ", scaleString,
         ", common.scale = ", x@commonScale,
         ")", sep="");

@@ -79,12 +79,12 @@ bglmer(formula, data, family = gaussian,
   but permit fine-tuning of the model.
 
   Supported distributions are \code{gamma}, \code{invgamma}, \code{wishart},
-  \code{invwishart}, and \code{NULL}.
+  \code{invwishart}, \code{NULL}, and \code{custom}.
 
   The \code{common.scale} option, a logical, determines whether or
-  not the prior is assumed to be given in an absolute-real world
-  sense (value = \code{FALSE}), or if the prior is rescaled by the
-  estimated variance of the data (\code{TRUE}). As a practical matter,
+  not the prior applies to in the absolute-real world
+  sense (value = \code{FALSE}), or if the prior is applied to the random effect
+  covariance divided by the estimated residual variance (\code{TRUE}). As a practical matter,
   when false computation can be slower as the profiled common scale may
   no longer have a closed-form solution. As such, the default for all
   cases is \code{TRUE}.
@@ -96,7 +96,6 @@ bglmer(formula, data, family = gaussian,
   
   Priors on the fixed effects, or unmodeled coefficients, are specified
   in a fashion similar to that of covariance priors. The general format is
-  
 
 \itemize{\item \code{fixef.prior = multivariate.distribution(options1 = value1, \dots)}}
   

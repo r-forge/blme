@@ -71,6 +71,7 @@ blme_covToSt <- function(cov) {
 
 
 blme_stMatricesToVector <- function(ST) {
+  if (!is.list(ST)) ST <- list(ST);
   result <- rep(0, sum(sapply(ST, function(ST.i) { n <- nrow(ST.i); n * (n + 1) / 2 })));
   offset <- 0;
   for (i in 1:length(ST)) {

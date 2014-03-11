@@ -1395,7 +1395,7 @@ SEXP mer_optimize(SEXP regression)
           // if we failed in finding a spot with a lower objective, move close to old optim params
           // since we followed the derivative and the func is continuous, eventually we'll be
           // so close that it'll be an improvement
-          if (objectiveFunction < oldObjectiveFunction) break;
+          if (objectiveFunction <= oldObjectiveFunction) break;
           
           stepScaleFactor = sqrt(stepScaleFactor);
         }

@@ -19,8 +19,9 @@
   passed what essentially
   are function calls with the distinction that they are delayed in evaluation
   until information about the model is available. At that time, the functions
-  are \emph{defined} in a special environment and then \emph{evaluated} in environment
-  from which \code{blmer} or \code{bglmer} was called. This is reflected in the
+  are \emph{defined} in a special environment and then \emph{evaluated} in an
+  environment that directly inherits form the one in which \code{blmer} or
+  \code{bglmer} was called. This is reflected in some of the
   prototypes of various prior-creating functions which depend on parameters not
   available in the top-level environment.
 
@@ -54,18 +55,17 @@
     To specify a prior in an absolute sense, set to \code{FALSE}. Argument
     is only applicable to linear mixed models.
 
-    \item \code{t(df = 5, sd = c(10, 2.5), scale, common.scale = TRUE)}
+    \item \code{t(df = 3, scale = c(10^2, 2.5^2), common.scale = TRUE)}
     
-    Except for the following issues, arguments are identical to those for Gaussian priors.
-    Degrees of freedom, the \code{df} argument, must be positive.
-    Specification by \code{sd} is possible only when the degrees of
-    freedom exceed 2, as this is required for the second moment to exist. Alternatively, 
-    \code{scale} can be a vector which is diagonalized or a positive definite matrix of
-    appropriate size. The two are related by \code{cov = scale * df / (df - 2)}.
+    The degrees of freedom - \code{df} argument - must be positive. If \code{scale} is
+    of length 1, it is repeated along the diagonal for every component. Length 2 repeats
+    just the second element for all slopes. Length equal to the number of fixed effects
+    sees the vector simply turned into a diagonal matrix. Finally, it can a full scale matrix,
+    so long as it is positive definite.
 
     \code{t} priors for linear mixed models require that the fixed effects be added to
     set of parameters that are numerically optimized, and thus can substantially
-    increase running time. In addition, when \code{common.scale} = \code{TRUE}, the
+    increase running time. In addition, when \code{common.scale} is \code{TRUE}, the
     residual variance must be numerically optimized as well. \code{normal} priors
     on the common scale can be fully profiled and do not suffer from this drawback.
 
@@ -102,6 +102,18 @@
 
    A scale of \code{0} or a shape of \code{0} imposes an improper prior. The behavior
    for singular matrices with only some zero eigenvalues is undefined.
+
+   \item \code{custom(fn, chol = FALSE, common.scale = TRUE, scale = "none")}
+
+   Applies to the given function (\code{fn}). If \code{chol} is \code{TRUE}, \code{fn} is
+   passed a \emph{right} factor of covariance matrix; \code{FALSE} results in the matrix being
+   passed directly. \code{scale} can be \code{"none"}, \code{"log"}, or \code{"dev"} corresponding to
+   \eqn{p(\Sigma)}, \eqn{\log p(\Sigma)}{log p(\Sigma)}, and \eqn{-2 \log p(\Sigma)}{-2 log p(\Sigma)}
+   respectively.
+
+   Since the prior is may have an arbitrary form, setting \code{common.scale} to \code{FALSE}
+   for a linear mixed model means that full profiling may no longer be possible. As such,
+   that parameter is numerically optimized.
   }
 
   \strong{Residual Variance Priors}
@@ -122,7 +134,7 @@
 }
 
 \section{Evaluating Environment}{
-  The variables that the evaluating environment have populated are:
+  The variables that the defining environment have populated are:
   \itemize{
     \item \code{p} aliased to \code{n.fixef} - the number of fixed effects
     \item \code{n} aliased to \code{n.obs} - the number of observations

@@ -101,7 +101,7 @@ blme_getPriorPenalty <- function(model) {
                                             blme.0:::getEnumOrder(blme.0:::commonScaleEnum, blme.0:::COMMON_SCALE_FALSE_NAME));
 
 
-  if (model@var.prior@type  == directType) {
+  if (model@var.prior@type == directType) {
     prior <- model@var.prior;
     family <- prior@families[1];
     if (family == gammaFamily) {

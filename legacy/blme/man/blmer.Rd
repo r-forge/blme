@@ -322,11 +322,11 @@ The default is an improper inverse gamma distribution with both parameters as 0,
 #    eight schools example
   y <- c(28, 8, -3, 7, -1, 1, 18, 12);
   sigma <- c(15, 10, 16, 11, 9, 11, 10, 18);
-  y.z <- (y - mean(y)) / sigma;
-  g <- 1:8
+  g <- 1:8;
   
-  (schools <- blmer(y.z ~ 1 + (1 | g), var.prior = "point",
-                   cov.prior = NULL, fixef.prior = NULL));
+  (schools <- blmer(y ~ 1 + (1 | g), var.prior = "point",
+                    cov.prior = NULL, fixef.prior = NULL,
+                    REML = FALSE, weights = 1 / sigma^2));
 }
 \keyword{models}
 \keyword{methods}

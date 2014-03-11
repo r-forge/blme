@@ -1,6 +1,6 @@
 2014-02-05 16:56 Vincent Dorie <vjd4@nyu.edu>
 
-  * Brought to parity with the latest lme4 release (1.0-6).
+  * Brought to parity with the latest lme4 release (1.1-6).
   * Bug fixes:
       quadratic term for normal priors calculated incorrectly when using non-zero correlations
       glmms could fail to apply full penalty term for mixed use of covariance priors
