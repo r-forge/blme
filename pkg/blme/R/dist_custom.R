@@ -1,10 +1,10 @@
 setClass("bmerCustomDist",
-         slots = list(fnName = "name",
-                      fn     = "function",
-                      chol   = "logical",
-                      scale  = "character"),
-         validity = function(object) object@scale == "log" || object@scale == "dev" || object@scale == "none",
-         contains = "bmerDist");
+         representation(fnName = "name",
+                        fn     = "function",
+                        chol   = "logical",
+                        scale  = "character"),
+         contains = "bmerDist",
+         validity = function(object) object@scale == "log" || object@scale == "dev" || object@scale == "none");
 
 toString.bmerCustomDist <- function(x, digits = getOption("digits"), ...) {
   paste("custom(fn = ", x@fnName,
