@@ -249,7 +249,7 @@ glmmDistributions <- list(
 
     return(normal(sd = sd, common.scale = FALSE));
   },
-  t = function(df = 5, scale = c(10^2, 2.5^2)) {
+  t = function(df = 3, scale = c(10^2, 2.5^2)) {
     t <- blme:::lmmDistributions$t;
     environment(t) <- environment();
         
