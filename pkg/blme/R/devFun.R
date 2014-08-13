@@ -41,19 +41,38 @@ mkBglmerDevfun <- function(fr, X, reTrms, family, nAGQ = 1L, verbose = 0L,
   
   devFunEnv$blmerControl <- createBlmerControl(pred, resp, reTrms, devFunEnv$priors);
   devFunEnv$parInfo <- getParInfo(pred, resp, devFunEnv$ranefStructure, devFunEnv$blmerControl);
+
   devFunBody <- getBglmerDevianceFunctionBody(devFunEnv, nAGQ != 0L);
+  ## devFunBody <- testGetBglmerDevianceFunctionBody(devfun)
 
   if (!is.null(devFunBody)) body(devfun) <- parse(text = devFunBody);
   
   return(devfun);
 }
 
+if (FALSE) {
+makeRefitDevFun <- function(env, nAGQ = 1L, verbose = 0, control = list()) {
+  lme4Env <- asNamespace("lme4")
+  devFun <- get("mkdevfun", lme4Env)(env, nAGQ, verbose, control)
+  
+  pred <- env$pp
+  resp <- env$resp
+
+  if (is(resp, "lmerResp")) {
+    
+  } else if (is(resp, "glmResp")) {
+  } else {
+    stop('response classe not supported')
+  }
+}
+}
 
 ## environment already populated at this point
 updateBglmerDevfun <- function(devfun, reTrms, nAGQ = 1L) {
   devfun <- updateGlmerDevfun(devfun, reTrms, nAGQ = nAGQ);
   devFunEnv <- environment(devfun);
   devFunBody <- getBglmerDevianceFunctionBody(devFunEnv, nAGQ != 0L);
+  ## devFunBody <- testGetBglmerDevianceFunctionBody(devfun)
 
   if (!is.null(devFunBody)) body(devfun) <- parse(text = devFunBody);
 
@@ -242,7 +261,38 @@ calculateFixefExponentialTerm <- function(beta, beta.tilde, RX, exponentialTerms
   }
   return(exponentialTerms);
 }
-    
+
+testGetBglmerDevianceFunctionBody <- function(devFun)
+{
+  devFunEnv <- environment(devFun)
+  priors <- devFunEnv$priors
+  
+  if (!anyPriorsApplied(priors)) return(NULL)
+
+  fixefPrior <- priors$fixefPrior
+  
+  devFunBody <- NULL
+  stringConnection <- textConnection("devFunBody", "w", local = TRUE)
+  sink(stringConnection)
+
+  cat("{\n",
+      "  Lambda.ts        <- getCovBlocks(pp$Lambdat, ranefStructure)\n",
+      "  exponentialTerms <- calculatePriorExponentialTerms(priors, spars, Lambda.ts)\n",
+      "  polynomialTerm   <- calculatePriorPolynomialTerm(priors$covPriors, Lambda.ts)\n\n",
+      "  ",
+      sep = "")
+  
+  oldDevFunBody <- deparse(body(devFun))
+  cat(oldDevFunBody[-length(oldDevFunBody)], sep = "\n") ## cut trailing "}"
+
+  cat("  } + exponentialTerms[[1]] + polynomialTerm + blmerControl$constant\n",
+      "}", sep = "")
+
+  sink()
+  close(stringConnection)
+  
+  return(devFunBody)
+}
 
 getBglmerDevianceFunctionBody <- function(devFunEnv, fixefAreParams)
 {
@@ -263,17 +313,17 @@ getBglmerDevianceFunctionBody <- function(devFunEnv, fixefAreParams)
 
   cat("  resp$updateMu(lp0);\n");
 
-  if (fixefAreParams) {
+  if (!fixefAreParams) {
+    cat("  spars <- rep(0, ncol(pp$X));\n",
+        "  pp$setTheta(as.double(theta));\n",
+        "  p <- pwrssUpdate(pp, resp, tolPwrss, GHrule(0L), compDev, verbose);\n",
+        sep = "");
+  } else {
     cat("  pp$setTheta(as.double(pars[dpars]));\n",
         "  spars <- as.numeric(pars[-dpars]);\n",
         "  offset <- if (length(spars) == 0) baseOffset else baseOffset + pp$X %*% spars;\n",
         "  resp$setOffset(offset);\n\n",
         "  p <- pwrssUpdate(pp, resp, tolPwrss, GQmat, compDev, fac, verbose);\n",
-        sep = "");
-  } else {
-    cat("  spars <- rep(0, ncol(pp$X));\n",
-        "  pp$setTheta(as.double(theta));\n",
-        "  p <- pwrssUpdate(pp, resp, tolPwrss, GHrule(0L), compDev, verbose);\n",
         sep = "");
   }
   
@@ -283,7 +333,7 @@ getBglmerDevianceFunctionBody <- function(devFunEnv, fixefAreParams)
       "  exponentialTerms <- calculatePriorExponentialTerms(priors, spars, Lambda.ts);\n",
       "  polynomialTerm <- calculatePriorPolynomialTerm(priors$covPriors, Lambda.ts);\n\n",
       
-      "  p + exponentialTerms[[1]] + polynomialTerm + blmerControl$constant",
+      "  p + exponentialTerms[[1]] + polynomialTerm + blmerControl$constant\n",
       "}\n",
       sep = "");
   devFunEnv$getCovBlocks <- getCovBlocks;

@@ -1,5 +1,6 @@
 ## for R-check
 wishart <- "ignored";
+
 blmer <- function(formula, data = NULL, REML = TRUE,
                   control = lmerControl(), start = NULL,
                   verbose = 0L, subset, weights, na.action, offset,
@@ -25,7 +26,7 @@ blmer <- function(formula, data = NULL, REML = TRUE,
     if(missCtrl) mc$control <- glmerControl()
     return(eval(mc, parent.frame(1L)))
   }
-
+  
   fixef.prior <- mc$fixef.prior; ## for delayed evaluation, get quoted versions
   cov.prior <- if (!missCovPrior) mc$cov.prior else formals(blmer)$cov.prior;
   resid.prior <- mc$resid.prior;
@@ -39,9 +40,9 @@ blmer <- function(formula, data = NULL, REML = TRUE,
     !is.null(resid.prior) && (grepl("^\\W*point", resid.prior) || (is.call(resid.prior) && resid.prior[[1]] == "point"));
   
   if (sigmaIsFixed) {
-    control$checkControl$check.nobs.vs.nlev <- "ignore";
+    control$checkControl$check.nobs.vs.nlev  <- "ignore";
     control$checkControl$check.nobs.vs.rankZ <- "ignore";
-    control$checkControl$check.nobs.vs.nRE <- "ignore";
+    control$checkControl$check.nobs.vs.nRE   <- "ignore";
   }
 
   hasPseudoData <-
@@ -73,34 +74,36 @@ blmer <- function(formula, data = NULL, REML = TRUE,
   if (devFunOnly) return(devfun);
   
   devFunEnv <- environment(devfun);
-  ## start <- getStartingValues(start, devFunEnv);
 
   opt <- optimizeLmer(devfun,
                       optimizer=control$optimizer,
                       restart_edge=control$restart_edge,
+                      boundary.tol=control$boundary.tol,
                       control=control$optCtrl,
                       verbose=verbose,
                       start=start,
-                      boundary.tol=control$boundary.tol,
                       calc.derivs=control$calc.derivs,
                       use.last.params=control$use.last.params)
+
+  ## dirty hacks to give some backwards lme4 compatibility
   cc <- NULL;
   lme4Env <- asNamespace("lme4");
   if (exists("checkConv", lme4Env)) {
-    cc <- get("checkConv", lme4Env)(attr(opt,"derivs"),opt$par,
+    cc <- get("checkConv", lme4Env)(attr(opt,"derivs"), opt$par,
                                     ctrl = control$checkConv,
-                                    lbound=environment(devfun)$lower)
+                                    lbound = environment(devfun)$lower)
   }
 
-  args <- list(rho = devFunEnv, opt = opt, reTrms = lmod$reTrms, fr = lmod$fr, mc = mcout);
-  if (!is.null(formals(mkMerMod)$lme4conv)) args$lme4conv <- cc;
-  result <- do.call("mkMerMod", args, TRUE, sys.frame(0));
-  result <- repackageMerMod(result, opt, devFunEnv);
+  args <- list(rho = devFunEnv, opt = opt, reTrms = lmod$reTrms, fr = lmod$fr, mc = mcout)
+  if ("lme4conv" %in% names(formals(mkMerMod))) args$lme4conv <- cc
+  result <- do.call("mkMerMod", args, TRUE, sys.frame(0))
   
-  return(result);
+  result <- repackageMerMod(result, opt, devFunEnv)
+  
+  return(result)
 }
 
-bglmer <- function(formula, data=NULL, family = gaussian,
+bglmer <- function(formula, data = NULL, family = gaussian,
                    control = glmerControl(), start = NULL, verbose = 0L, nAGQ = 1L,
                    subset, weights, na.action, offset,
                    contrasts = NULL, mustart, etastart, devFunOnly = FALSE,
@@ -127,8 +130,8 @@ bglmer <- function(formula, data=NULL, family = gaussian,
   ## family-checking code duplicated here and in glFormula (for now) since
   ## we really need to redirect at this point; eventually deprecate formally
   ## and clean up
-  if (is.character(family))
-    family <- get(family, mode = "function", envir = parent.frame(2))
+ if (is.character(family))
+   family <- get(family, mode = "function", envir = parent.frame(2))
   if( is.function(family)) family <- family()
   if (isTRUE(all.equal(family, gaussian()))) {
     ## redirect to lmer (with warning)
@@ -157,9 +160,13 @@ bglmer <- function(formula, data=NULL, family = gaussian,
   if (is.list(start) && !is.null(start$fixef))
     if (nAGQ==0) stop("should not specify both start$fixef and nAGQ==0")
 
-  args <- list(devfun = devfun, optimizer = control$optimizer[[1]],
+  args <- list(devfun = devfun,
+               optimizer = control$optimizer[[1]],
                restart_edge = if (nAGQ == 0) control$restart_edge else FALSE,
-               start = start, verbose = verbose, control = control$optCtrl, nAGQ = 0);
+               control = control$optCtrl,
+               start = start,
+               nAGQ = 0,
+                verbose = verbose);
   if (!is.null(formals(optimizeGlmer)$boundary.tol)) args$boundary.tol <- if (nAGQ == 0) control$boundary.tol else 0;
   if (!is.null(formals(optimizeGlmer)[["..."]])) {
     args$calc.derivs <- FALSE;
@@ -178,33 +185,35 @@ bglmer <- function(formula, data=NULL, family = gaussian,
     args$devfun <- devfun;
     args$optimizer <- control$optimizer[[2]];
     args$restart_edge <- control$restart_edge;
+    args$start <- start
     args$nAGQ <- nAGQ;
     args$stage <- 2;
     if (!is.null(formals(optimizeGlmer)$boundary.tol)) args$boundary.tol <- control$boundary.tol;
     if (!is.null(formals(optimizeGlmer)[["..."]])) {
-      args$calc.derivs <- FALSE;
+      args$calc.derivs <- control$calc.derivs;
       args$use.last.params <- control$use.last.params;
     }
     ## reoptimize deviance function over covariance parameters and fixed effects
     opt <- do.call("optimizeGlmer", args, TRUE, sys.frame(0));
   }
-  lme4Env <- asNamespace("lme4");
+
+  lme4Env <- asNamespace("lme4")
   cc <- if (!is.null(control$calc.derivs) && !control$calc.derivs) NULL else {
-    if (verbose>10) cat("checking convergence\n")
+    if (verbose > 10) cat("checking convergence\n")
     if (exists("checkConv", lme4Env))
       get("checkConv", lme4Env)(attr(opt,"derivs"), opt$par,
                 ctrl = control$checkConv,
-                lbound=environment(devfun)$lower)
+                lbound = environment(devfun)$lower)
     else NULL
   }
   
   ## prepare output
-  args <- list(rho = environment(devfun), opt = opt, reTrms = glmod$reTrms, fr = glmod$fr, mc = mcout);
-  if (!is.null(formals(mkMerMod)$lme4conv)) args$lme4conv <- cc;
-  result <- do.call("mkMerMod", args, TRUE, sys.frame(0));
-  result <- repackageMerMod(result, opt, environment(devfun));
+  args <- list(rho = environment(devfun), opt = opt, reTrms = glmod$reTrms, fr = glmod$fr, mc = mcout)
+  if ("lme4conv" %in% names(formals(mkMerMod))) args$lme4conv <- cc
+  result <- do.call("mkMerMod", args, TRUE, sys.frame(0))
+  result <- repackageMerMod(result, opt, environment(devfun))
   
-  return(result);
+  return(result)
 }
 
 lmmObjective <- function(pp, resp, sigma, exponentialTerms, polynomialTerm, blmerControl) {
@@ -419,5 +428,36 @@ runOptimizerWithPrior <- function(regression, cov.prior = NULL,
   regression <- setPrior(regression, cov.prior, fixef.prior, var.prior, envir);
   
   return(runOptimizer(regression, verbose));
+}
+}
+
+if (FALSE) {
+## use this to produce calls of the form
+##  package:::functionName
+## so that we can evaluate non-exported functions in
+## the user's environment
+quoteInNamespace <- function(name) {
+  result <- quote(a + b)
+  result[[1]] <- as.symbol(":::")
+  result[[2]] <- as.symbol("blme")
+  result[[3]] <- match.call()[[2]]
+  result
+}
+
+
+.refit.bmerMod <- NA
+refit.bmerMod <- function(object, newresp = NULL, rename.response = FALSE, ...)
+{
+  if (is.na(.refit.bmerMod)) jiggerRefitFromLme4()
+  
+  
+  matchedCall <- match.call()
+  mc[[1]] <- quoteInNamespace(.refit.bmerMod)
+  eval(matchedCall, parent.frame(1L))
+}
+
+jiggerRefitFromLme4 <- function()
+{
+  
 }
 }

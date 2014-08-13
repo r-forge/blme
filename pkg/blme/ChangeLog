@@ -1,4 +1,9 @@
-2014-07-09 Vincent Dorie <vjd4@nyu.edu
+2014-08-14 Vincent Dorie <vjd4@nyu.edu>
+
+  * Now correctly stores lme4 convergence warnings
+
+2014-07-09 Vincent Dorie <vjd4@nyu.edu>
+
   * added CITATION file
 
 2014-02-05 16:56 Vincent Dorie <vjd4@nyu.edu>
